@@ -9,6 +9,8 @@ node_modules/
 .env.test
 
 # build output
+src/**/*.js
+src/**/*.js.map
 public
 
 # vercel

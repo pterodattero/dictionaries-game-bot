@@ -6,13 +6,17 @@
     "configurations": [
         {
             "type": "node",
+            "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/nodemon",
             "request": "launch",
             "name": "Launch Bot",
-            "skipFiles": [
-                "<node_internals>/**"
+            "program": "${workspaceFolder}/src/index.js",
+            "outFiles": [
+                "${workspaceFolder}/src/**/*.js",
+                "!**/node_modules/**"
             ],
-            "program": "${workspaceFolder}\\index.js",
-            "envFile": "${workspaceFolder}/.env"
+            "envFile": "${workspaceFolder}/.env",
+            "sourceMaps": true,
+            "smartStep": true
         }
     ]
 }
