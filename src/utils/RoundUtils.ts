@@ -16,7 +16,6 @@ export class RoundUtils {
         }
         await global.bot.answerCallbackQuery(query.id);
         await global.bot.editMessageText('Game started!', { chat_id: chatId, message_id: query.message?.message_id });
-        await Controller.setGameStatus(chatId, Status.QUESTION);
         await RoundUtils.newRound(chatId);
     }
 
@@ -24,29 +23,10 @@ export class RoundUtils {
     public static async newRound(chatId: number) {
         if (!(await Controller.newRound(chatId))) {
             // Give prizes
-            const scores = await Controller.getScores(chatId);
-            const scoreGroups: { [score: number]: number[] } = {};
-            for (const userId in scores) {
-                if (!scoreGroups[scores[userId]]) {
-                    scoreGroups[scores[userId]] = [];
-                }
-                scoreGroups[scores[userId]].push(Number(userId));
-            }
-
-            const orderedScoreGroups = Object.fromEntries(Object.entries(scoreGroups).sort(entry => Number(entry[0])));
-            let message = 'Game finished!';
-            const medals = Array.from('🥇🥈🥉');
-            for (const i in medals) {
-                if (Number(i) >= Object.keys(orderedScoreGroups).length) {
-                    break;
-                }
-                const currentMedalNames = (await Promise.all(orderedScoreGroups[i].map((userId) => global.bot.getChatMember(chatId, userId))))
-                    .map(member => member.user.username);
-                message += `\n${medals[i]} ${currentMedalNames.join(', ')}: ${Object.keys(orderedScoreGroups)[i]}`;
-            }
-            await global.bot.sendMessage(chatId, message);
+            await RoundUtils.finalScoreboard(chatId);
         }
         else {
+            await Controller.setGameStatus(chatId, Status.QUESTION);
 
             // Notify on group who is the leader
             const leader = (await global.bot.getChatMember(chatId, await Controller.getCurrentPlayer(chatId))).user;
@@ -67,6 +47,30 @@ export class RoundUtils {
             );
             await Controller.setMessageInteraction(message.message_id, leader.id, chatId);
         }
+    }
+
+    private static async finalScoreboard(chatId: number) {
+        const scores = await Controller.getScores(chatId);
+        const scoreGroups: { [score: number]: number[]; } = {};
+        for (const userId in scores) {
+            if (!scoreGroups[scores[userId]]) {
+                scoreGroups[scores[userId]] = [];
+            }
+            scoreGroups[scores[userId]].push(Number(userId));
+        }
+
+        const orderedScoreGroups = Object.fromEntries(Object.entries(scoreGroups).sort(entry => Number(entry[0])));
+        let message = 'Game finished!';
+        const medals = Array.from('🥇🥈🥉');
+        for (const i in medals) {
+            if (Number(i) >= Object.keys(orderedScoreGroups).length) {
+                break;
+            }
+            const currentMedalNames = (await Promise.all(orderedScoreGroups[i].map((userId) => global.bot.getChatMember(chatId, userId))))
+                .map(member => member.user.username);
+            message += `\n${medals[i]} ${currentMedalNames.join(', ')}: ${Object.keys(orderedScoreGroups)[i]}`;
+        }
+        await global.bot.sendMessage(chatId, message);
     }
 
     // Receive the round word from leader and notify players
@@ -95,7 +99,7 @@ export class RoundUtils {
         for (const userId of players) {
             const text = (userId == msg.from.id)
                 ? `Reply to this message with the correct definition of "${word}"`
-                : `{update.effectiveUser.name} chose "${word}". Reply to this message with your fake definition`;
+                : `${msg.from.username} chose "${word}". Reply to this message with your fake definition`;
             const message = await global.bot.sendMessage(userId, text, { reply_markup: { force_reply: true, input_field_placeholder: `max ${ MAX_POLL_OPTION_LENGTH } characters` } });
             await Controller.setMessageInteraction(message.message_id, userId, chatId);
         }
