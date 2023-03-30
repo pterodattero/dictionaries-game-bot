@@ -4,7 +4,8 @@
   "description": "A Telegram bot written in Node.js to play dictionaries game.",
   "main": "index.js",
   "scripts": {
-    "build": "tsc --build"
+    "build": "tsc --build",
+    "build-dev": "tsc --build tsconfig.dev.json"
   },
   "repository": {
     "type": "git",
@@ -19,9 +20,9 @@
   "dependencies": {
     "@vercel/node": "^2.10.0",
     "dotenv": "^16.0.3",
+    "i18next": "22.4.13",
     "mongoose": "^7.0.1",
-    "node-telegram-bot-api": "^0.51.0",
-    "i18next": "22.4.13"
+    "node-telegram-bot-api": "^0.51.0"
   },
   "devDependencies": {
     "@types/node-telegram-bot-api": "^0.61.3",

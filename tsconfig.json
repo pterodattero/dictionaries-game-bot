@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "es2016",
     "module": "CommonJS",
-    "outDir": "./public",
+    "outDir": "dist",
     "declaration": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,

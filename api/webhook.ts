@@ -2,12 +2,12 @@
 // Fixes an error with Promise cancellation
 process.env.NTBA_FIX_319 = 'test';
 
-import bot from '../public/bot';
-import { Controller } from '../public/controller';
-import CommandHandler from '../public/handlers/CommandHandler';
-import InlineQueryHandler from '../public/handlers/InlineQueryHandler';
-import PollAnswerHandler from '../public/handlers/PollAnswerHandler';
-import TextHandler from '../public/handlers/TextHandler';
+import bot from '../dist/bot';
+import { Controller } from '../dist/controller';
+import CommandHandler from '../dist/handlers/CommandHandler';
+import InlineQueryHandler from '../dist/handlers/InlineQueryHandler';
+import PollAnswerHandler from '../dist/handlers/PollAnswerHandler';
+import TextHandler from '../dist/handlers/TextHandler';
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { Update } from 'node-telegram-bot-api';
 

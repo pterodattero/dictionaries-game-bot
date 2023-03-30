@@ -11,7 +11,7 @@ node_modules/
 # build output
 src/**/*.js
 src/**/*.js.map
-public
+dist
 
 # vercel
 .vercel

@@ -20,7 +20,7 @@ export namespace Controller {
         if (!process.env.MONGODB_URI)
             throw "Invalid MONGODB_URI environment variable"
         console.log("Connecting to MongoDB...");
-        await mongoose.connect(process.env.MONGODB_URI, { dbName: process.env.DB_NAME });
+        await mongoose.connect(process.env.MONGODB_URI, { dbName: process.env.DB_NAME ?? process.env.NODE_ENV });
         console.log("Connected");
     }
 
