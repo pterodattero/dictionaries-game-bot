@@ -14,6 +14,10 @@ import { Update } from 'node-telegram-bot-api';
 
 export default async function handler(request: VercelRequest, response: VercelResponse) {
     try {
+        if (request.headers['x-telegram-bot-api-secret-token'] !== process.env.WEBHOOK_SECRET) {
+            throw "Invalid secret";
+        }
+
         const update: Update = request.body;
         await Controller.connect();
         
