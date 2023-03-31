@@ -172,16 +172,17 @@ export class RoundUtils {
             throw "Error during poll creation";
         }
 
-        await Controller.setPollInteraction(message.poll.id, chatId);
+        await Controller.setPollInteraction(message.poll.id, chatId, message.message_id);
     }
 
 
     // Read poll answers and when completed post scores
     public static async answer(pollAnswer: PollAnswer) {
-        const chatId = await Controller.getPollInteraction(pollAnswer.poll_id);
-        if (!chatId) {
+        const res = await Controller.getPollInteraction(pollAnswer.poll_id);
+        if (!res) {
             return;
         }
+        const { chatId, messageId } = res;
 
         // ignore votes of non playing members and leader
         const players = await Controller.getPlayers(chatId);
@@ -198,6 +199,9 @@ export class RoundUtils {
         await Controller.addVote(chatId, pollAnswer.user.id, pollAnswer.option_ids[0]);
 
         if ((await Controller.numberOfVotes(chatId)) >= (await Controller.numberOfPlayers(chatId)) - 1) {
+            // close poll
+            await global.bot.stopPoll(chatId, messageId);
+
             // update scores
             const roundPoints = await Controller.getRoundPoints(chatId);
             const oldScore = await Controller.getScores(chatId);

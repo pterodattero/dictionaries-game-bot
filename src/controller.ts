@@ -41,8 +41,8 @@ export namespace Controller {
             return interaction.chatId;
     }
 
-    export async function setPollInteraction(pollId: string, chatId: number): Promise<void> {
-        await PollInteraction.create({ pollId, chatId });
+    export async function setPollInteraction(pollId: string, chatId: number, messageId: number): Promise<void> {
+        await PollInteraction.create({ pollId, chatId, messageId });
     }
 
     export async function unsetPollInteraction(pollId: string): Promise<void> {
@@ -50,10 +50,14 @@ export namespace Controller {
             PollInteraction.deleteOne({ pollId });
     }
 
-    export async function getPollInteraction(pollId: string): Promise<number | undefined> {
+    export async function getPollInteraction(pollId: string): Promise<{ chatId: number, messageId: number } | undefined> {
         const interaction = await PollInteraction.findOne({ pollId });
-        if (interaction)
-            return interaction.chatId;
+        if (interaction) {
+            return {
+                chatId: interaction.chatId,
+                messageId: interaction.messageId,
+            };
+        }
     }
 
     // Game methods
