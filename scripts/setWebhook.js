@@ -1,9 +1,13 @@
-require('dotenv').config();
-
 const token = process.env.BOT_TOKEN;
 const secret = process.env.WEBHOOK_SECRET;
 
 async function main() {
+    if (!token) {
+        "Missing token";
+    }
+    if (!secret) {
+        "Missing secret";
+    }
     const result = await fetch(`https://api.telegram.org/bot${ token }/setWebhook`,
         {
             method: 'POST',
@@ -20,4 +24,6 @@ async function main() {
     console.log(await result.json());
 }
 
-main();
+if (process.env.NODE_ENV !== 'development') {
+    main();
+}

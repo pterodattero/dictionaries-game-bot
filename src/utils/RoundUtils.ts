@@ -1,4 +1,5 @@
 import TelegramBot, { CallbackQuery, InlineKeyboardMarkup, Message, PollAnswer } from "node-telegram-bot-api"
+
 import { Controller } from "../controller"
 import { Status } from "../models/Game";
 
@@ -6,24 +7,24 @@ import { Status } from "../models/Game";
 const MAX_POLL_DESCRIPTION_LENGTH = 255;
 const MAX_POLL_OPTION_LENGTH = 100;
 
-export class RoundUtils {
+export namespace RoundUtils {
 
     // Check if game is ready and start the first round
-    public static async startGame(query: CallbackQuery) {
+    export const startGame = async (query: CallbackQuery) => {
         const chatId = query.message?.chat.id;
         if (!chatId) {
             throw "Invalid query";
         }
         await global.bot.answerCallbackQuery(query.id);
         await global.bot.editMessageText('Game started!', { chat_id: chatId, message_id: query.message?.message_id });
-        await RoundUtils.newRound(chatId);
+        await newRound(chatId);
     }
 
     // Start a new round
-    public static async newRound(chatId: number) {
+    export const newRound = async (chatId: number) => {
         if (!(await Controller.newRound(chatId))) {
             // Give prizes
-            await RoundUtils.finalScoreboard(chatId);
+            await finalScoreboard(chatId);
         }
         else {
             await Controller.setGameStatus(chatId, Status.QUESTION);
@@ -49,7 +50,7 @@ export class RoundUtils {
         }
     }
 
-    private static async finalScoreboard(chatId: number) {
+    const finalScoreboard = async (chatId: number) => {
         const scores = await Controller.getScores(chatId);
         const scoreGroups: { [score: number]: number[]; } = {};
         for (const userId in scores) {
@@ -74,7 +75,7 @@ export class RoundUtils {
     }
 
     // Receive the round word from leader and notify players
-    public static async word(msg: Message) {
+    export const word = async (msg: Message) => {
         if (!msg.reply_to_message || !msg.from || !msg.text) {
             throw "Invalid message";
         }
@@ -107,7 +108,7 @@ export class RoundUtils {
     }
 
     // Receive the definitions from players and send poll when done
-    public static async definition(msg: Message) {
+    export const definition = async (msg: Message) => {
         if (!msg.reply_to_message || !msg.from || !msg.text) {
             throw "Invalid message";
         }
@@ -140,14 +141,14 @@ export class RoundUtils {
 
         if ((await Controller.numberOfDefinitions(chatId)) === (await Controller.numberOfPlayers(chatId))) {
             await Controller.setGameStatus(chatId, Status.POLL);
-            await RoundUtils.sendPoll(chatId);
+            await sendPoll(chatId);
         }
 
         await Controller.unsetMessageInteraction(msg.message_id, msg.from.id);
     }
 
     // Send poll with definitions
-    public static async sendPoll(chatId: number) {
+    export const sendPoll = async (chatId: number) => {
         // shuffle and retrieve definitions
         const word = await Controller.getWord(chatId);
         const correctOptionId = await Controller.shuffleDefinitions(chatId);
@@ -177,7 +178,7 @@ export class RoundUtils {
 
 
     // Read poll answers and when completed post scores
-    public static async answer(pollAnswer: PollAnswer) {
+    export const answer = async (pollAnswer: PollAnswer) => {
         const res = await Controller.getPollInteraction(pollAnswer.poll_id);
         if (!res) {
             return;
@@ -217,7 +218,7 @@ export class RoundUtils {
             await global.bot.sendMessage(chatId, message);
 
             // start new round
-            await RoundUtils.newRound(chatId);
+            await newRound(chatId);
             await Controller.unsetPollInteraction(pollAnswer.poll_id);
         }
     }

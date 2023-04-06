@@ -1,12 +1,13 @@
 import TelegramBot, { CallbackQuery, Message } from "node-telegram-bot-api"
+
 import { Controller } from "../controller"
 import { Status } from "../models/Game"
 import { RoundUtils } from "./RoundUtils";
 
-export class PreparationUtils {
+export namespace PreparationUtils {
 
     // Start a new game, asking players to join
-    public static async startPreparation(msg: Message) {
+    export const startPreparation = async (msg: Message) => {
         // Notify if game has already started
         if (await Controller.getGameStatus(msg.chat.id) !== Status.STOPPED)
             await global.bot.sendMessage(msg.chat.id, 'A game is already going on in this chat.');
@@ -16,15 +17,16 @@ export class PreparationUtils {
             await Controller.initGame(msg.chat.id);
             await global.bot.sendMessage(
                 msg.chat.id,
-                await PreparationUtils.getJoinMessage(msg),
-                { reply_markup: await PreparationUtils.getJoinKeyboard(msg) }
+                await getJoinMessage(msg),
+                { reply_markup: await getJoinKeyboard(msg) }
             )
         }
 
     }
 
+
     // Handle join keyboard button press
-    public static async join(query: CallbackQuery) {
+    export const join = async (query: CallbackQuery) => {
         if (!query.message?.chat.id) {
             throw 'Invalid query'
         }
@@ -39,8 +41,8 @@ export class PreparationUtils {
 
         if (await Controller.addPlayer(query.message.chat.id, query.from.id)) {
             const messageKey = { chat_id: query.message.chat.id, message_id: query.message.message_id }
-            const replyMarkup = await PreparationUtils.getJoinKeyboard(query.message);
-            await global.bot.editMessageText(await PreparationUtils.getJoinMessage(query.message), { reply_markup: replyMarkup, ...messageKey, });
+            const replyMarkup = await getJoinKeyboard(query.message);
+            await global.bot.editMessageText(await getJoinMessage(query.message), { reply_markup: replyMarkup, ...messageKey, });
 
             // When maximum nuber of players is reached start first round
             if ((await Controller.numberOfPlayers(query.message.chat.id)) >= Controller.MAX_PLAYERS) {
@@ -52,15 +54,16 @@ export class PreparationUtils {
         }
     }
 
+
     // Handle withraw button press
-    public static async withdraw(query: CallbackQuery) {
+    export const withdraw = async (query: CallbackQuery) => {
         if (!query.message?.chat.id || !query.message.from?.id) {
             throw 'Invalid query';
         }
         if (await Controller.removePlayer(query.message.chat.id, query.from?.id)) {
             const messageKey = { chat_id: query.message.chat.id, message_id: query.message.message_id }
-            const replyMarkup = await PreparationUtils.getJoinKeyboard(query.message);
-            await global.bot.editMessageText(await PreparationUtils.getJoinMessage(query.message), { reply_markup: replyMarkup, ...messageKey, });
+            const replyMarkup = await getJoinKeyboard(query.message);
+            await global.bot.editMessageText(await getJoinMessage(query.message), { reply_markup: replyMarkup, ...messageKey, });
         }
         else {
             await global.bot.answerCallbackQuery(query.id, { text: "You haven't joined yet" });
@@ -69,7 +72,7 @@ export class PreparationUtils {
 
 
     // Auxiliary method to draw join keyboard
-    private static async getJoinKeyboard(msg: Message): Promise<TelegramBot.InlineKeyboardMarkup> {
+    const getJoinKeyboard = async (msg: Message) => {
         const numberOfPlayers = await Controller.numberOfPlayers(msg.chat.id);
         const botInviteLink = `https://t.me/${(await global.bot.getMe()).username}`;
         const keyboard: TelegramBot.InlineKeyboardMarkup = {
@@ -94,7 +97,7 @@ export class PreparationUtils {
 
 
     // Auxiliary method to draw join keyboard
-    private static async getJoinMessage(msg: Message) {
+    const getJoinMessage = async (msg: Message) => {
         let message = 'Heads up! Up to 10 players are accepted.';
         const playerIds = await Controller.getPlayers(msg.chat.id);
         const members = await Promise.all(playerIds.map(((userId) => global.bot.getChatMember(msg.chat.id, userId))));
