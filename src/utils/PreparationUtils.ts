@@ -1,8 +1,9 @@
-import TelegramBot, { CallbackQuery, Message } from "node-telegram-bot-api"
+import TelegramBot, { CallbackQuery, Message } from "node-telegram-bot-api";
 
 import { Controller } from "../controller"
 import { Status } from "../models/Game"
 import { RoundUtils } from "./RoundUtils";
+import { GenericUtils } from "./GenericUtils";
 
 export namespace PreparationUtils {
 
@@ -10,7 +11,7 @@ export namespace PreparationUtils {
     export const startPreparation = async (msg: Message) => {
         // Notify if game has already started
         if (await Controller.getGameStatus(msg.chat.id) !== Status.STOPPED)
-            await global.bot.sendMessage(msg.chat.id, 'A game is already going on in this chat.');
+            await global.bot.sendMessage(msg.chat.id, global.polyglot.t('prepare.refuse'));
 
         // Start joining stage
         else {
@@ -28,15 +29,15 @@ export namespace PreparationUtils {
     // Handle join keyboard button press
     export const join = async (query: CallbackQuery) => {
         if (!query.message?.chat.id) {
-            throw 'Invalid query'
+            throw 'Invalid query';
         }
         try {
-            const message = await global.bot.sendMessage(query.from.id, "Trying to interact with you...");
+            const message = await global.bot.sendMessage(query.from.id, global.polyglot.t('prepare.interactionTry'));
             await global.bot.deleteMessage(query.from.id, message.message_id);
         }
         catch (err) {
-            await global.bot.answerCallbackQuery(query.id, { text: 'Please register before joining' });
-            return
+            await global.bot.answerCallbackQuery(query.id, { text: global.polyglot.t('prepare.interactionError') });
+            return;
         }
 
         if (await Controller.addPlayer(query.message.chat.id, query.from.id)) {
@@ -50,7 +51,7 @@ export namespace PreparationUtils {
             }
         }
         else {
-            await global.bot.answerCallbackQuery(query.id, { text: 'You have already joined' });
+            await global.bot.answerCallbackQuery(query.id, { text: global.polyglot.t('prepare.alreadyJoined') });
         }
     }
 
@@ -66,7 +67,7 @@ export namespace PreparationUtils {
             await global.bot.editMessageText(await getJoinMessage(query.message), { reply_markup: replyMarkup, ...messageKey, });
         }
         else {
-            await global.bot.answerCallbackQuery(query.id, { text: "You haven't joined yet" });
+            await global.bot.answerCallbackQuery(query.id, { text: global.polyglot.t('prepare.notJoined') });
         }
     }
 
@@ -78,32 +79,32 @@ export namespace PreparationUtils {
         const keyboard: TelegramBot.InlineKeyboardMarkup = {
             inline_keyboard: [
                 [
-                    { text: `Join (${Controller.MAX_PLAYERS - numberOfPlayers})`, callback_data: 'prepare:join' },
-                    { text: 'Withdraw', callback_data: 'prepare:withdraw' }
+                    { text: global.polyglot.t('prepare.keyboard.join', { availableSlots: Controller.MAX_PLAYERS - numberOfPlayers }), callback_data: 'prepare:join' },
+                    { text: global.polyglot.t('prepare.keyboard.withdraw'), callback_data: 'prepare:withdraw' }
                 ]
             ]
         };
 
         if ((numberOfPlayers >= Controller.MIN_PLAYERS) || (process.env.NODE_ENV === 'development')) {
-            keyboard.inline_keyboard[0].push({ text: 'Continue', callback_data: 'prepare:continue' })
+            keyboard.inline_keyboard[0].push({ text: global.polyglot.t('prepare.keyboard.continue'), callback_data: 'prepare:continue' })
         }
 
         if (botInviteLink) {
-            keyboard.inline_keyboard.push([{ text: 'Register for PM', url: botInviteLink }])
+            keyboard.inline_keyboard.push([{ text: global.polyglot.t('prepare.keyboard.register'), url: botInviteLink }])
         }
 
         return keyboard;
     }
 
 
-    // Auxiliary method to draw join keyboard
+    // Auxiliary method to get preparation message
     const getJoinMessage = async (msg: Message) => {
-        let message = 'Heads up! Up to 10 players are accepted.';
+        let message = global.polyglot.t('prepare.start', { minPlayers: Controller.MIN_PLAYERS, maxPlayers: Controller.MAX_PLAYERS });
         const playerIds = await Controller.getPlayers(msg.chat.id);
         const members = await Promise.all(playerIds.map(((userId) => global.bot.getChatMember(msg.chat.id, userId))));
-        const playerNames = members.map(((member) => member.user.username));
+        const playerNames = members.map(((member) => GenericUtils.getUserLabel(member.user)));
         if (playerNames.length) {
-            message += `\n${playerNames.join(', ')} already joined.`;
+            message += `\n${global.polyglot.t('prepare.playersAlreadyJoined', { playersList: playerNames.join(', ') })}`;
         }
         return message;
     }

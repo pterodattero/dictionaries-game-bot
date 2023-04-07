@@ -1,0 +1,46 @@
+{
+    "prepare": {
+        "start": "Attenzione, è tempo di farsi avanti! Sono richiesti da %{minPlayers} a %{maxPlayers} giocatori per giocare. Se non mi hai già autorizzato a scriverti in privato è il momento di farlo. Quando tutti gli interessati hanno aderito, premere il bottone Continua per iniziare.",
+        "playersAlreadyJoined": "%{playersList} hanno già aderito.",
+        "refuse": "Un gioco è già in corso in questa chat.",
+        "interactionTry": "Provo a interagire con te...",
+        "interactionError": "Per favore autorizzami per partecipare",
+        "alreadyJoined": "Hai già aderito",
+        "notJoined": "Non hai ancora aderito",
+        "keyboard": {
+            "join": "Partecipa (%{availableSlots})",
+            "withdraw": "Ritirati",
+            "continue": "Gioca",
+            "register": "Autorizza PM"
+        },
+        "gameStarted": "Gioco iniziato!"
+    },
+    "round": {
+        "startMessage": "Turno %{round}/%{totalRounds}\n%{leader} deve scegliere una parola!",
+        "leader": {
+            "word": "È il tuo turno per decidere una parola per la chat %{group}! Rispondi a questo messaggio con la tua scelta.",
+            "definition": "Perfetto. Ora rispondi a questo messaggio con la definizione corretta di %{word}."
+        },
+        "player": {
+            "definition": "%{leader} ha scelto la parola %{word} per questo turno. Ora rispondi a questo messaggio con la tua definizione fittizia."
+        },
+        "end": "Ottimo! Puoi tornare nella chat di gruppo e aspettare che gli altri giocatori finiscano di dare la loro definizione.",
+        "checkGroup": "Controlla gruppo",
+        "maxLength": "max %{maxLength} caratteri",
+        "tooLongWordError": "Una parola può essere al massimo lunga %{maxLength} caratteri.",
+        "tooLongDefinitionError": "Una definizione può essere al massimo lunga %{maxLength} caratteri.",
+        "poll": "Qual'è la definizione corretta di %{word}?",
+        "pollIntermission": "Non stai giocando in questo gioco, il tuo voto non sarà considerato",
+        "scoreboard": "Punteggio:",
+        "invalidInteraction": "Mi dispiace, questo messaggio non è più attivo."
+    },
+    "end": "Gioco finito!",
+    "replyAlert": "Se vuoi interagire con me per favore rispondi ai miei messaggi (scorri a sinistra)",
+    "help": "Il narratore sceglie una parola strana, inusuale dal dizionario. L'obiettivo è scegliere una parola che nessuno ha mai sentito, e il cui significato è di difficile intuizione. Mentre il narratore inserisce la definizione corretta, ciascun giocatore inserisce una sua definizione fasulla ma credibile. Poi, il bot invia un sondaggio con le definizioni mischiate e anonime. I giocatori devono votare per quella che credono la definizione corretta.\nPunti:\n - i giocatori prendono %{guessPoints} pt. per aver indovinato la definizione corretta, ma se tutti indovinano prendono %{everyoneGuessedPoints}\n - se tutti indovinano, il narratore prende %{everyoneGuessedLeaderPoints} pt. \n - altrimenti prende %{notEveryoneGuessedLeaderPoints} pt. \n - inoltre, in giocatore prendono %{votePoints} pt. per ogni voto ricevuto \nDopo che tutti hanno giocato da narratore, chi ha più punti vince!",
+    "resources": "Ecco qualche risorsa:",
+    "language": {
+        "noGroup": "Questo comando può essere usato solo nei gruppi",
+        "select": "Seleziona il linguaggio da usare in questa chat",
+        "done": "Linguaggio impostato a italiano"
+    }
+}

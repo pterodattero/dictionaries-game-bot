@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import Game, { IGame, Status } from "./models/Game";
 import MessageInteraction from "./models/MessageInteraction";
 import PollInteraction from "./models/PollInteraction";
+import Settings from "./models/Settings";
 
 
 
@@ -10,11 +11,11 @@ export namespace Controller {
     export const MIN_PLAYERS = 4;
     export const MAX_PLAYERS = 10;
 
-    const VOTE_POINTS = 1;
-    const GUESS_POINTS = 3;
-    const EVERYONE_GUESSED_POINTS = 2;
-    const NOT_EVERYONE_GUESSED_LEADER_POINTS = 3;
-    const EVERYONE_GUESSED_LEADER_POINTS = 0;
+    export const VOTE_POINTS = 1;
+    export const GUESS_POINTS = 3;
+    export const EVERYONE_GUESSED_POINTS = 2;
+    export const NOT_EVERYONE_GUESSED_LEADER_POINTS = 3;
+    export const EVERYONE_GUESSED_LEADER_POINTS = 0;
 
     // general DB methods
     export async function connect() {
@@ -23,6 +24,18 @@ export namespace Controller {
         console.log("Connecting to MongoDB...");
         await mongoose.connect(process.env.MONGODB_URI, { dbName: process.env.DB_NAME ?? process.env.NODE_ENV });
         console.log("Connected");
+    }
+
+    export async function getLanguange(chatId?: number) {
+        if (!chatId) {
+            return 'en';
+        }
+        const result = await Settings.findOne({ chatId });
+        return result?.language ?? 'en';
+    }
+
+    export async function setLanguange(chatId: number, language: string) {
+        await Settings.replaceOne({ chatId }, { chatId, language }, { upsert: true });
     }
 
     // Interaction methods

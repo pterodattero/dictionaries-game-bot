@@ -5,23 +5,27 @@ import { PreparationUtils } from "./utils/PreparationUtils";
 import { RoundUtils } from "./utils/RoundUtils";
 import { Controller } from "./controller";
 import { Status } from "./models/Game";
+import * as I18n from "./i18n";
+import { LanguageUtils } from "./utils/LanguageUtils";
 
-const handleCommand = async (msg: Message) => {
+
+const handleCommand = async (msg: Message, language: string) => {
     try {
         switch (msg.text?.substring(1)) {
             case 'start':
-                console.log("Start command");
                 await CommandUtils.startCommand(msg);
                 break;
             case 'stop':
-                console.log("Stop command");
                 await CommandUtils.stopCommand(msg);
                 break;
             case 'help':
-            case 'rules':
+                await CommandUtils.helpCommand(msg);
+                break;
+            case 'language':
+                await LanguageUtils.languageCommand(msg);
+                break;
             case 'about':
             default:
-                await global.bot.sendMessage(msg.chat.id, "Unrecognized command");
         }
     }
     catch (err) {
@@ -43,7 +47,11 @@ const handleCallbackQuery = async (query: CallbackQuery) => {
                 await RoundUtils.startGame(query);
                 break;
             default:
-                await global.bot.sendMessage(query.chat_instance, "Unrecognized query data");
+                if (query.data?.startsWith('language:')) {
+                    await LanguageUtils.languageCallback(query);
+                } else {
+                    await global.bot.sendMessage(query.chat_instance, "Unrecognized query data");
+                }
         }
     }
     catch (err) {
@@ -80,7 +88,7 @@ const handleText = async (msg: Message) => {
 
         // only replies are valid, otherwise it is not possible to uniquely reconduce text to group chats
         if (!msg.reply_to_message) {
-            await global.bot.sendMessage(msg.chat.id, "If you want to interact with me please reply to my messages (swipe left)", { reply_to_message_id: msg.message_id });
+            await global.bot.sendMessage(msg.chat.id, global.polyglot.t('replyAlert'), { reply_to_message_id: msg.message_id });
             return;
         }
     
@@ -90,6 +98,7 @@ const handleText = async (msg: Message) => {
     
         const chatId = await Controller.getMessageInteraction(msg.reply_to_message.message_id,  msg.from.id);
         if (!chatId) {
+            global.bot.sendMessage(msg.from.id, global.polyglot.t('round.invalidInteraction'));
             return;
         }
     
@@ -107,10 +116,24 @@ const handleText = async (msg: Message) => {
 }
 
 
+const inferLanguageFromUpdate = async (update: Update) => {
+    const chatId = update.message?.chat.type === 'group' ? update.message?.chat.id
+        : update.callback_query ? update.callback_query.message?.chat.id
+        : update.poll_answer ? (await Controller.getPollInteraction(update.poll_answer.poll_id))?.chatId
+        : update.message?.reply_to_message?.from && update.message.from ? await Controller.getMessageInteraction(update.message.reply_to_message.message_id, update.message.from.id)
+        : undefined;
+    const language = await Controller.getLanguange(chatId);
+    return language;
+}
+
+
 const handleUpdate = async (update: Update) => {
+    // infer chat context
+    const language = await inferLanguageFromUpdate(update);
+    await I18n.init(language);
 
     if (update.message?.text && update.message.text.match(/^\/\w+$/)) {
-        await handleCommand(update.message);
+        await handleCommand(update.message, language);
     } else if (update.callback_query) {
         await handleCallbackQuery(update.callback_query);
     } else if (update.poll_answer) {

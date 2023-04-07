@@ -16,7 +16,9 @@ async function main() {
         if (updates.length) {
             console.log(`${ updates.length } update(s) received`)
         }
-        await Promise.all(updates.map(handleUpdate));
+        for (const update of updates) {
+            await handleUpdate(update);
+        }
     }, 1000);
 }
 

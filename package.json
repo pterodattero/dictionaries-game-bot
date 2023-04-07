@@ -23,10 +23,12 @@
     "dotenv": "^16.0.3",
     "i18next": "22.4.13",
     "mongoose": "^7.0.1",
-    "node-telegram-bot-api": "^0.51.0"
+    "node-telegram-bot-api": "^0.51.0",
+    "node-polyglot": "^2.5.0"
   },
   "devDependencies": {
     "@types/node-telegram-bot-api": "^0.61.3",
+    "@types/node-polyglot": "^2.4.2",
     "nodemon": "^2.0.21",
     "typescript": "^4.9.5"
   }

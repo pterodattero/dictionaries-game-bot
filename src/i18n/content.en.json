@@ -1,0 +1,46 @@
+{
+    "prepare": {
+        "start": "Heads up, time to join! Between %{minPlayers} and %{maxPlayers} are required to play. If you haven't allowed PM yet you have to do it now. Once everyone who wants to play has joined, press the continue button to start.",
+        "playersAlreadyJoined": "%{playersList} already joined.",
+        "refuse": "A game is already going on in this chat.",
+        "interactionTry": "Trying to interact with you...",
+        "interactionError": "Please register before joining",
+        "alreadyJoined": "You have already joined",
+        "notJoined": "You haven't joined yet",
+        "keyboard": {
+            "join": "Join (%{availableSlots})",
+            "withdraw": "Withdraw",
+            "continue": "Play",
+            "register": "Register for PM"
+        },
+        "gameStarted": "Game started!"
+    },
+    "round": {
+        "startMessage": "Round %{round}/%{totalRounds}\n%{leader} has to pick a word!",
+        "leader": {
+            "word": "It is your turn to pick a word for chat %{chat}! Reply to this message with your choice.",
+            "definition": "Perfect. Now reply to this message the correct definition of %{word}."
+        },
+        "player": {
+            "definition": "%{leader} chose the word %{word} for this round. Now reply to this message your fake definition."
+        },
+        "end": "Got it! You can go back to group chat and wait for other players to enter their definition.",
+        "checkGroup": "Check group chat", 
+        "maxLength":  "max %{maxLength} characters",
+        "tooLongWordError": "A word can be at most %{maxLength} long.",
+        "tooLongDefinitionError": "A definition can be at most %{maxLength} long.",
+        "poll": "Which is the correct definition of %{word}?",
+        "pollIntermission": "You're not playing in this game, so your vote won't be considered.",
+        "scoreboard": "Scoreboard:",
+        "invalidInteraction": "Sorry, this message is not active anymore."
+    },
+    "end": "Game finished!",
+    "replyAlert": "If you want to interact with me please reply to my messages (swipe left)",
+    "help": "The leader of the game will select an odd, unusual word from the dictionary. The goal is to select a word that no one has ever heard of before, and that the meaning would be really hard to guess. While the leader writes the correct definition, each player writes down a fake but credible definition for it. Next, the bot sends a poll with the shuffled definitions without specifying the author. The players have to vote on which one they think is the real definition.\nPoints:\n - players get %{guessPoints} pt. for guessing the correct definition, but if everyone guesses she gets %{everyoneGuessedPoints}\n - if everyone guesses correctly, the leader gets %{everyoneGuessedLeaderPoints} pt. \n - otherwise she gets %{notEveryoneGuessedLeaderPoints} pt. \n - furthermore, players get %{votePoints} pt. for every received vote \nAfter everyone has had a turn as leader, the person who has scored the most points wins!",
+    "resources": "Check these out:",
+    "language": {
+        "noGroup": "This command can be used only in groups",
+        "select": "Select the language that you want to use in this chat",
+        "done": "Language set to English"
+    }
+}
