@@ -2,18 +2,20 @@ import mongoose from "mongoose";
 import Game, { IGame, Status } from "./models/Game";
 import MessageInteraction from "./models/MessageInteraction";
 import PollInteraction from "./models/PollInteraction";
+import Settings from "./models/Settings";
 
 
 
 export namespace Controller {
     // constants
-    export const MIN_PLAYERS = 4
-    export const MAX_PLAYERS = 10
-    
-    const VOTE_POINTS = 1
-    const NONE_GUESSED_POINTS = 0
-    const SOMEONE_GUESSED_POINTS = 3
-    const EVERYONE_GUESSED_POINTS = 0
+    export const MIN_PLAYERS = 4;
+    export const MAX_PLAYERS = 10;
+
+    export const VOTE_POINTS = 1;
+    export const GUESS_POINTS = 3;
+    export const EVERYONE_GUESSED_POINTS = 2;
+    export const NOT_EVERYONE_GUESSED_LEADER_POINTS = 3;
+    export const EVERYONE_GUESSED_LEADER_POINTS = 0;
 
     // general DB methods
     export async function connect() {
@@ -24,9 +26,21 @@ export namespace Controller {
         console.log("Connected");
     }
 
+    export async function getLanguange(chatId?: number) {
+        if (!chatId) {
+            return 'en';
+        }
+        const result = await Settings.findOne({ chatId });
+        return result?.language ?? 'en';
+    }
+
+    export async function setLanguange(chatId: number, language: string) {
+        await Settings.replaceOne({ chatId }, { chatId, language }, { upsert: true });
+    }
+
     // Interaction methods
-    export async function setMessageInteraction(messageId: number, userId: number, chatId: number): Promise<void> {
-        await MessageInteraction.create({ messageId, userId, chatId });
+    export async function setMessageInteraction(messageId: number, userId: number, chatId: number, groupMessageId: number): Promise<void> {
+        await MessageInteraction.create({ messageId, userId, chatId, groupMessageId });
     }
 
     export async function unsetMessageInteraction(messageId: number, userId: number): Promise<void> {
@@ -34,14 +48,17 @@ export namespace Controller {
             await MessageInteraction.deleteOne({ messageId, userId })
     }
 
-    export async function getMessageInteraction(messageId: number, userId: number): Promise<number | undefined> {
+    export async function getMessageInteraction(messageId: number, userId: number): Promise<{ chatId: number, groupMessageId: number } | undefined> {
         const interaction = await MessageInteraction.findOne({ messageId, userId });
         if (interaction)
-            return interaction.chatId;
+            return {
+                chatId: interaction.chatId,
+                groupMessageId: interaction.groupMessageId,
+            }
     }
 
-    export async function setPollInteraction(pollId: string, chatId: number): Promise<void> {
-        await PollInteraction.create({ pollId, chatId });
+    export async function setPollInteraction(pollId: string, chatId: number, messageId: number): Promise<void> {
+        await PollInteraction.create({ pollId, chatId, messageId });
     }
 
     export async function unsetPollInteraction(pollId: string): Promise<void> {
@@ -49,10 +66,14 @@ export namespace Controller {
             PollInteraction.deleteOne({ pollId });
     }
 
-    export async function getPollInteraction(pollId: string): Promise<number | undefined> {
+    export async function getPollInteraction(pollId: string): Promise<{ chatId: number, messageId: number } | undefined> {
         const interaction = await PollInteraction.findOne({ pollId });
-        if (interaction)
-            return interaction.chatId;
+        if (interaction) {
+            return {
+                chatId: interaction.chatId,
+                messageId: interaction.messageId,
+            };
+        }
     }
 
     // Game methods
@@ -207,6 +228,16 @@ export namespace Controller {
         return indexes.indexOf(game.round);
     }
 
+    export async function getMissingPlayers(chatId: number): Promise<number[]> {
+        const game = await getGame(chatId);
+        if (game.round === undefined)
+            throw Error('No round in act');
+
+        return game.players
+            .filter((playerData) => !playerData.definition)
+            .map((playerData) => playerData.userId);
+    }
+
     // Vote methods
     export async function addVote(chatId: number, userId: number, index: number): Promise<void> {
         const game = await getGame(chatId);
@@ -231,46 +262,23 @@ export namespace Controller {
         for (const player of game.players) {
             roundPoints[player.userId] = 0;
         }
-        const roundPlayer = await getCurrentPlayer(chatId);
+        const leaderId = await getCurrentPlayer(chatId);
 
-        // Guesses
-        let guesses = 0;
+        // Infer case
+        const everyoneGuessed = !game.players.find((player) => player.vote !== leaderId && player.userId !== leaderId);
+
+        // Guess points
         for (const player of game.players) {
-            if (player.vote === roundPlayer) {
-                guesses += 1
+            if (player.userId === leaderId) {
+                roundPoints[player.userId] += everyoneGuessed ? NOT_EVERYONE_GUESSED_LEADER_POINTS : EVERYONE_GUESSED_LEADER_POINTS;
+            } else {
+                roundPoints[player.userId] += everyoneGuessed ? EVERYONE_GUESSED_POINTS : GUESS_POINTS;
             }
         }
 
-        // everyone guessed
-        if (guesses === await numberOfPlayers(chatId)) {
-            for (const player of game.players) {
-                if (player.userId !== roundPlayer) {
-                    roundPoints[player.userId] += EVERYONE_GUESSED_POINTS
-                }
-            }
-        }
-
-        // none guessed
-        else if (guesses === 0) {
-            for (const player of game.players) {
-                if (player.userId !== roundPlayer) {
-                    roundPoints[player.userId] += NONE_GUESSED_POINTS
-                }
-            }
-        }
-
-        // intermediate case
-        else {
-            for (const player of game.players) {
-                if (player.userId === roundPlayer || (player.userId !== roundPlayer && player.vote === roundPlayer)) {
-                    roundPoints[player.userId] += SOMEONE_GUESSED_POINTS
-                }
-            }
-        }
-
-        // received votes
+        // Vote points
         for (const player of game.players) {
-            if (player.vote && player.vote !== player.userId) {
+            if (player.vote && player.vote !== player.userId && player.vote !== leaderId) {
                 roundPoints[player.vote] += VOTE_POINTS;
             }
         }

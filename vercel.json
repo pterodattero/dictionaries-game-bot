@@ -1,3 +1,6 @@
 {
-    "outputDirectory": "dist"
+    "outputDirectory": "dist",
+    "redirects": [
+        { "source": "/((?!api/).*)", "destination": "https://t.me/dictionaries_game_bot" }
+    ]
 }
