@@ -39,8 +39,10 @@
     "help": "Il narratore sceglie una parola strana, inusuale dal dizionario. L'obiettivo è scegliere una parola che nessuno ha mai sentito, e il cui significato è di difficile intuizione. Mentre il narratore inserisce la definizione corretta, ciascun giocatore inserisce una sua definizione fasulla ma credibile. Poi, il bot invia un sondaggio con le definizioni mischiate e anonime. I giocatori devono votare per quella che credono la definizione corretta.\nPunti:\n - i giocatori prendono %{guessPoints} pt. per aver indovinato la definizione corretta, ma se tutti indovinano prendono %{everyoneGuessedPoints}\n - se tutti indovinano, il narratore prende %{everyoneGuessedLeaderPoints} pt. \n - altrimenti prende %{notEveryoneGuessedLeaderPoints} pt. \n - inoltre, in giocatore prendono %{votePoints} pt. per ogni voto ricevuto \nDopo che tutti hanno giocato da narratore, chi ha più punti vince!",
     "resources": "Ecco qualche risorsa:",
     "language": {
+        "selectGroup": "Seleziona il linguaggio da usare in questa chat e nei messaggi privati collegati",
+        "selectPrivate": "Seleziona il linguaggio da usare per le interazioni con me non collegate a giochi",
         "noGroup": "Questo comando può essere usato solo nei gruppi",
-        "select": "Seleziona il linguaggio da usare in questa chat",
+        "select": "",
         "done": "Linguaggio impostato a italiano"
     }
 }

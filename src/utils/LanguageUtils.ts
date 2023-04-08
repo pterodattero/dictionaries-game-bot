@@ -12,11 +12,9 @@ export enum Language {
 export namespace LanguageUtils {
 
     export const languageCommand = async (msg: Message) => {
-        if (msg.chat.type !== 'group') {
-            return global.bot.sendMessage(msg.chat.id, global.polyglot.t('language.noGroup'));
-        }
+        const text = global.polyglot.t(msg.chat.type === 'group' ? 'language.selectGroup' : 'language.selectPrivate');
         await global.bot.sendMessage(
-            msg.chat.id, global.polyglot.t('language.select'),
+            msg.chat.id, text,
             {
                 reply_markup: {
                     inline_keyboard: [

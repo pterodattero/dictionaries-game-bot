@@ -39,8 +39,8 @@
     "help": "The leader of the game will select an odd, unusual word from the dictionary. The goal is to select a word that no one has ever heard of before, and that the meaning would be really hard to guess. While the leader writes the correct definition, each player writes down a fake but credible definition for it. Next, the bot sends a poll with the shuffled definitions without specifying the author. The players have to vote on which one they think is the real definition.\nPoints:\n - players get %{guessPoints} pt. for guessing the correct definition, but if everyone guesses she gets %{everyoneGuessedPoints}\n - if everyone guesses correctly, the leader gets %{everyoneGuessedLeaderPoints} pt. \n - otherwise she gets %{notEveryoneGuessedLeaderPoints} pt. \n - furthermore, players get %{votePoints} pt. for every received vote \nAfter everyone has had a turn as leader, the person who has scored the most points wins!",
     "resources": "Check these out:",
     "language": {
-        "noGroup": "This command can be used only in groups",
-        "select": "Select the language that you want to use in this chat",
+        "selectGroup": "Select the language that you want to use in this chat and in related private messages",
+        "selectPrivate": "Select the language that you want to use with game unrelated interactions with me",
         "done": "Language set to English"
     }
 }
