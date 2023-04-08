@@ -16,7 +16,12 @@
         "gameStarted": "Game started!"
     },
     "round": {
-        "startMessage": "Round %{round}/%{totalRounds}\n%{leader} has to pick a word!",
+        "group": {
+            "round": "Round %{round}/%{totalRounds}",
+            "word": "%{leader} has to pick a word.",
+            "definition": "%{missingPlayers} still have to enter their definition.",
+            "end": "%{leader} is the leader"
+        },
         "leader": {
             "word": "It is your turn to pick a word for chat %{chat}! Reply to this message with your choice.",
             "definition": "Perfect. Now reply to this message the correct definition of %{word}."

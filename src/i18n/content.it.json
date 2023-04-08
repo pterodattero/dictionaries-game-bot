@@ -16,6 +16,12 @@
         "gameStarted": "Gioco iniziato!"
     },
     "round": {
+        "group": {
+            "round": "Turno %{round}/%{totalRounds}",
+            "word": "%{leader} deve scegliere una parola.",
+            "definition": "%{missingPlayers} devono ancora mandare la definizione.",
+            "end": "%{leader} è il narratore"
+        },
         "startMessage": "Turno %{round}/%{totalRounds}\n%{leader} deve scegliere una parola!",
         "leader": {
             "word": "È il tuo turno per decidere una parola per la chat %{group}! Rispondi a questo messaggio con la tua scelta.",

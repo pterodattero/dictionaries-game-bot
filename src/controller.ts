@@ -39,8 +39,8 @@ export namespace Controller {
     }
 
     // Interaction methods
-    export async function setMessageInteraction(messageId: number, userId: number, chatId: number): Promise<void> {
-        await MessageInteraction.create({ messageId, userId, chatId });
+    export async function setMessageInteraction(messageId: number, userId: number, chatId: number, groupMessageId: number): Promise<void> {
+        await MessageInteraction.create({ messageId, userId, chatId, groupMessageId });
     }
 
     export async function unsetMessageInteraction(messageId: number, userId: number): Promise<void> {
@@ -48,10 +48,13 @@ export namespace Controller {
             await MessageInteraction.deleteOne({ messageId, userId })
     }
 
-    export async function getMessageInteraction(messageId: number, userId: number): Promise<number | undefined> {
+    export async function getMessageInteraction(messageId: number, userId: number): Promise<{ chatId: number, groupMessageId: number } | undefined> {
         const interaction = await MessageInteraction.findOne({ messageId, userId });
         if (interaction)
-            return interaction.chatId;
+            return {
+                chatId: interaction.chatId,
+                groupMessageId: interaction.groupMessageId,
+            }
     }
 
     export async function setPollInteraction(pollId: string, chatId: number, messageId: number): Promise<void> {
@@ -223,6 +226,16 @@ export namespace Controller {
         game.indexes = indexes;
         await game.save();
         return indexes.indexOf(game.round);
+    }
+
+    export async function getMissingPlayers(chatId: number): Promise<number[]> {
+        const game = await getGame(chatId);
+        if (game.round === undefined)
+            throw Error('No round in act');
+
+        return game.players
+            .filter((playerData) => !playerData.definition)
+            .map((playerData) => playerData.userId);
     }
 
     // Vote methods

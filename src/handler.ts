@@ -101,13 +101,13 @@ const handleText = async (msg: Message) => {
             throw "Invalid message";
         }
     
-        const chatId = await Controller.getMessageInteraction(msg.reply_to_message.message_id,  msg.from.id);
-        if (!chatId) {
+        const res = await Controller.getMessageInteraction(msg.reply_to_message.message_id,  msg.from.id);
+        if (!res) {
             global.bot.sendMessage(msg.from.id, global.polyglot.t('round.invalidInteraction'));
             return;
         }
     
-        const status = await Controller.getGameStatus(chatId);
+        const status = await Controller.getGameStatus(res.chatId);
         if (status === Status.QUESTION) {
             await RoundUtils.word(msg);
         }
@@ -125,7 +125,7 @@ const inferLanguageFromUpdate = async (update: Update) => {
     const chatId = update.message?.chat.type === 'group' ? update.message?.chat.id
         : update.callback_query ? update.callback_query.message?.chat.id
         : update.poll_answer ? (await Controller.getPollInteraction(update.poll_answer.poll_id))?.chatId
-        : update.message?.reply_to_message?.from && update.message.from ? await Controller.getMessageInteraction(update.message.reply_to_message.message_id, update.message.from.id)
+        : update.message?.reply_to_message?.from && update.message.from ? (await Controller.getMessageInteraction(update.message.reply_to_message.message_id, update.message.from.id))?.chatId
         : update.message?.from?.id;
     const language = await Controller.getLanguange(chatId);
     return language;

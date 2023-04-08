@@ -34,17 +34,18 @@ export namespace RoundUtils {
 
             // Notify on group who is the leader
             const leader = (await global.bot.getChatMember(chatId, await Controller.getCurrentPlayer(chatId))).user;
-            const replyMarkup: InlineKeyboardMarkup = {
-                inline_keyboard: [[{ text: 'Check bot chat', url: `https://t.me/${(await global.bot.getMe()).username}` }]]
-            };
-            await global.bot.sendMessage(
+            const groupMessage = await global.bot.sendMessage(
                 chatId,
-                global.polyglot.t('round.startMessage', {
-                    round: (await Controller.getRound(chatId) ?? 0) + 1,
-                    totalRounds: await Controller.numberOfPlayers(chatId),
-                    leader: GenericUtils.getUserLabel(leader),
-                }),
-                { reply_markup: replyMarkup }
+                [
+                    global.polyglot.t('round.group.round', {
+                        round: (await Controller.getRound(chatId) ?? 0) + 1,
+                        totalRounds: await Controller.numberOfPlayers(chatId),
+                    }),
+                    global.polyglot.t('round.group.word', {
+                        leader: GenericUtils.getUserLabel(leader),
+                    })
+                ].join('\n'),
+                { reply_markup: await getCheckBotChatReplyMarkup() }
             );
 
             // Contact privately the leader
@@ -52,14 +53,16 @@ export namespace RoundUtils {
             const resources: { text: string, url: string }[] = JSON.parse((await Fs.readFile(Path.resolve(__dirname, '../i18n', `resources.${language}.json`))).toString());
             const message = await global.bot.sendMessage(
                 leader.id,
-                global.polyglot.t('round.leader.word', {chat: (await global.bot.getChat(chatId)).title}),
-                { reply_markup: {
-                    force_reply: true,
-                    input_field_placeholder: global.polyglot.t('round.maxLength', { maxLength: MAX_POLL_DESCRIPTION_LENGTH }),
-                    inline_keyboard: [resources],
-                } }
+                global.polyglot.t('round.leader.word', { chat: (await global.bot.getChat(chatId)).title }),
+                {
+                    reply_markup: {
+                        force_reply: true,
+                        input_field_placeholder: global.polyglot.t('round.maxLength', { maxLength: MAX_POLL_DESCRIPTION_LENGTH }),
+                        inline_keyboard: [resources],
+                    }
+                }
             );
-            await Controller.setMessageInteraction(message.message_id, leader.id, chatId);
+            await Controller.setMessageInteraction(message.message_id, leader.id, chatId, groupMessage.message_id);
         }
     }
 
@@ -73,7 +76,7 @@ export namespace RoundUtils {
             scoreGroups[scores[userId]].push(Number(userId));
         }
 
-        const orderedScoreGroups = Object.entries(scoreGroups).sort(entry => Number(entry[0]));
+        const orderedScoreGroups = Object.entries(scoreGroups).sort(entry => Number(entry[0])).reverse();
         let message = global.polyglot.t('end');
         const medals = Array.from('🥇🥈🥉');
         for (const i in medals) {
@@ -82,7 +85,7 @@ export namespace RoundUtils {
             }
             const currentMedalNames = (await Promise.all(orderedScoreGroups[i][1].map((userId) => global.bot.getChatMember(chatId, userId))))
                 .map(member => member.user.username);
-            message += `\n${medals[i]} ${currentMedalNames.join(', ')}: ${orderedScoreGroups[i][0]}`;
+            message += `\n${medals[i]} ${currentMedalNames.join(', ')}: ${orderedScoreGroups[i][0]} `;
         }
         await global.bot.sendMessage(chatId, message);
     }
@@ -92,10 +95,11 @@ export namespace RoundUtils {
         if (!msg.reply_to_message || !msg.from || !msg.text) {
             throw "Invalid message";
         }
-        const chatId = await Controller.getMessageInteraction(msg.reply_to_message.message_id, msg.from.id);
-        if (!chatId) {
+        const res = await Controller.getMessageInteraction(msg.reply_to_message.message_id, msg.from.id);
+        if (!res) {
             return;
         }
+        const { chatId, groupMessageId } = res;
 
         // Get new word
         const word = msg.text;
@@ -116,10 +120,19 @@ export namespace RoundUtils {
             const message = await global.bot.sendMessage(
                 userId,
                 text,
-                { reply_markup: { force_reply: true, input_field_placeholder: global.polyglot.t('round.maxLength', { maxLength: MAX_POLL_OPTION_LENGTH })}}
+                {
+                    reply_markup: {
+                        force_reply: true,
+                        input_field_placeholder: global.polyglot.t('round.maxLength', { maxLength: MAX_POLL_OPTION_LENGTH })
+                    }
+                }
             );
-            await Controller.setMessageInteraction(message.message_id, userId, chatId);
+            await Controller.setMessageInteraction(message.message_id, userId, chatId, groupMessageId);
         }
+
+        // Update round message on group chat
+        await editGroupMessage(chatId, groupMessageId);
+
         await Controller.unsetMessageInteraction(msg.reply_to_message.message_id, msg.from.id);
     }
 
@@ -128,21 +141,22 @@ export namespace RoundUtils {
         if (!msg.reply_to_message || !msg.from || !msg.text) {
             throw "Invalid message";
         }
-        const chatId = await Controller.getMessageInteraction(msg.reply_to_message.message_id, msg.from.id);
-        if (!chatId) {
+        const res = await Controller.getMessageInteraction(msg.reply_to_message.message_id, msg.from.id);
+        if (!res) {
             return;
         }
+        const { chatId, groupMessageId } = res;
 
         // Get new definition
         const definition = msg.text;
         if (definition.length > MAX_POLL_OPTION_LENGTH) {
-            global.bot.sendMessage(msg.from.id,  global.polyglot.t('tooLongDefinitionError', { maxLength: MAX_POLL_OPTION_LENGTH }));
+            global.bot.sendMessage(msg.from.id, global.polyglot.t('tooLongDefinitionError', { maxLength: MAX_POLL_OPTION_LENGTH }));
             return;
         }
         await Controller.setDefinition(chatId, msg.from.id, definition);
         await Controller.setGameStatus(chatId, Status.ANSWER);
 
-        // Reply
+        // Reply in private
         let replyMarkup: InlineKeyboardMarkup | undefined;
         const chat = await global.bot.getChat(chatId);
         if (chat.invite_link) {
@@ -157,9 +171,45 @@ export namespace RoundUtils {
         if ((await Controller.numberOfDefinitions(chatId)) === (await Controller.numberOfPlayers(chatId))) {
             await Controller.setGameStatus(chatId, Status.POLL);
             await sendPoll(chatId);
+
+            const leader = (await global.bot.getChatMember(chatId, await Controller.getCurrentPlayer(chatId))).user;
+            await global.bot.editMessageText(
+                [
+                    global.polyglot.t('round.group.round', {
+                        round: (await Controller.getRound(chatId) ?? 0) + 1,
+                        totalRounds: await Controller.numberOfPlayers(chatId),
+                    }),
+                    global.polyglot.t('round.group.end', {
+                        leader: GenericUtils.getUserLabel(leader),
+                    })
+                ].join('\n'),
+                { reply_markup: await getCheckBotChatReplyMarkup(), chat_id: chatId, message_id: groupMessageId }
+            );
+        }
+        else {
+            await editGroupMessage(chatId, groupMessageId);
         }
 
         await Controller.unsetMessageInteraction(msg.message_id, msg.from.id);
+    }
+
+    const editGroupMessage = async (chatId: number, groupMessageId: number) => {
+        // Update round message on group chat
+        const missingPlayersIds = await Controller.getMissingPlayers(chatId);
+        const members = await Promise.all(missingPlayersIds.map(((userId) => global.bot.getChatMember(chatId, userId))));
+        const missingPlayers = members.map((member) => GenericUtils.getUserLabel(member.user));
+        await global.bot.editMessageText(
+            [
+                global.polyglot.t('round.group.round', {
+                    round: (await Controller.getRound(chatId) ?? 0) + 1,
+                    totalRounds: await Controller.numberOfPlayers(chatId),
+                }),
+                global.polyglot.t('round.group.definition', {
+                    missingPlayers: missingPlayers.join(', ')
+                })
+            ].join('\n'),
+            { reply_markup: await getCheckBotChatReplyMarkup(), chat_id: chatId, message_id: groupMessageId }
+        );
     }
 
     // Send poll with definitions
@@ -169,7 +219,7 @@ export namespace RoundUtils {
         const correctOptionId = await Controller.shuffleDefinitions(chatId);
         const definitions = await Controller.getDefinitions(chatId);
 
-        if (process.env.NODE_ENV === 'development') {
+        if (process.env.NODE_ENV === 'development' && await Controller.numberOfPlayers(chatId) == 1) {
             definitions.push('Stub definition');
         }
 
@@ -228,7 +278,7 @@ export namespace RoundUtils {
             let message = global.polyglot.t('round.scoreboard');
             for (const userId in newScore) {
                 const playerName = (await global.bot.getChatMember(chatId, Number(userId))).user.username;
-                message += `\n${ playerName }\t${ oldScore[Number(userId)] }\t+ ${ roundPoints[Number(userId)] }\t = ${ newScore[Number(userId)] }`;
+                message += `\n${playerName} \t${oldScore[Number(userId)]} \t + ${roundPoints[Number(userId)]} \t = ${newScore[Number(userId)]} `;
             }
             await global.bot.sendMessage(chatId, message);
 
@@ -236,6 +286,13 @@ export namespace RoundUtils {
             await newRound(chatId);
             await Controller.unsetPollInteraction(pollAnswer.poll_id);
         }
+    }
+
+
+    const getCheckBotChatReplyMarkup = async () => {
+        return {
+            inline_keyboard: [[{ text: 'Check bot chat', url: `https://t.me/${(await global.bot.getMe()).username}` }]]
+        } as InlineKeyboardMarkup;
     }
 
 }
