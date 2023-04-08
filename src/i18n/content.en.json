@@ -13,7 +13,8 @@
             "continue": "Play",
             "register": "Register for PM"
         },
-        "gameStarted": "Game started!"
+        "gameStarted": "Game started!",
+        "nonJoinedContinue": "You have to join to start a game"
     },
     "round": {
         "group": {

@@ -13,7 +13,8 @@
             "continue": "Gioca",
             "register": "Autorizza PM"
         },
-        "gameStarted": "Gioco iniziato!"
+        "gameStarted": "Gioco iniziato!",
+        "nonJoinedContinue": "Devi partecipare per avviare il gioco"
     },
     "round": {
         "group": {

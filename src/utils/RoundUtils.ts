@@ -18,6 +18,9 @@ export namespace RoundUtils {
         if (!chatId) {
             throw "Invalid query";
         }
+        if (!(await Controller.getPlayers(chatId)).includes(query.from.id)) {
+            return global.bot.answerCallbackQuery(query.id, { text: global.polyglot.t('prepare.nonJoinedContinue') });
+        }
         await global.bot.answerCallbackQuery(query.id);
         await global.bot.editMessageText(global.polyglot.t('prepare.gameStarted'), { chat_id: chatId, message_id: query.message?.message_id });
         await newRound(chatId);
