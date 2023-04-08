@@ -121,7 +121,7 @@ const inferLanguageFromUpdate = async (update: Update) => {
         : update.callback_query ? update.callback_query.message?.chat.id
         : update.poll_answer ? (await Controller.getPollInteraction(update.poll_answer.poll_id))?.chatId
         : update.message?.reply_to_message?.from && update.message.from ? await Controller.getMessageInteraction(update.message.reply_to_message.message_id, update.message.from.id)
-        : undefined;
+        : update.message?.from?.id;
     const language = await Controller.getLanguange(chatId);
     return language;
 }
