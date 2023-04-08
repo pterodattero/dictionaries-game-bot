@@ -49,5 +49,10 @@
         "done": "Language set to English"
     },
     "about": "This project is open source. Check it out on [GitHub](https://github.com/pterodattero/dictionaries-game-bot)",
-    "donate": "I don't feel ready yet for asking real money, but I appreciate your intent ❤️"
+    "donate": "I don't feel ready yet for asking real money, but I appreciate your intent ❤️",
+    "command": {
+        "startError": "Please add me to a group chat to play",
+        "startNoGame": "No game is going on in this chat",
+        "stop": "Game stopped"
+    }
 }

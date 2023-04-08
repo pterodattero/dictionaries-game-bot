@@ -52,5 +52,10 @@
         "done": "Linguaggio impostato a italiano"
     },
     "about": "Questo progetto è open source. Dai un'occhiata su [GitHub](https://github.com/pterodattero/dictionaries-game-bot)",
-    "donate": "Non mi sento pronto per ricevere soldi veri, ma apprezzo il pensiero ❤️"
+    "donate": "Non mi sento pronto per ricevere soldi veri, ma apprezzo il pensiero ❤️",
+    "command": {
+        "startError": "Per favore aggiungimi ad un gruppo per giocare",
+        "startNoGame": "Nessun gioco è in corso in questa chat",
+        "stop": "Gioco fermato"
+    }
 }

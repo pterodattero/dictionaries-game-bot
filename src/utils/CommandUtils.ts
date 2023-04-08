@@ -8,8 +8,8 @@ export namespace CommandUtils {
 
     export const startCommand = async (msg: Message) => {
         // If chat is not a group tell the player to add it to a group
-        if (msg.chat.type !== "group" && msg.chat.type !== "supergroup") {
-            await global.bot.sendMessage(msg.chat.id, 'Please add me to a group chat to play.');
+        if (msg.chat.type !== "group") {
+            await global.bot.sendMessage(msg.chat.id, global.polyglot.t('command.startError'));
         }
         else {
             await PreparationUtils.startPreparation(msg);
@@ -20,10 +20,10 @@ export namespace CommandUtils {
         // If chat is not a group tell the player to add it to a group
         if (await Controller.getGameStatus(msg.chat.id) !== Status.STOPPED) {
             await Controller.setGameStatus(msg.chat.id, Status.STOPPED);
-            await global.bot.sendMessage(msg.chat.id, 'Game stopped');
+            await global.bot.sendMessage(msg.chat.id, global.polyglot.t('command.stop'));
         }
         else {
-            await global.bot.sendMessage(msg.chat.id, 'No game is going on');
+            await global.bot.sendMessage(msg.chat.id, global.polyglot.t('command.startNoGame'));
         }
     }
 
