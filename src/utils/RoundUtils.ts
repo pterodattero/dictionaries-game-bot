@@ -186,7 +186,7 @@ export namespace RoundUtils {
                         leader: GenericUtils.getUserLabel(leader),
                     })
                 ].join('\n'),
-                { reply_markup: await getCheckBotChatReplyMarkup(), chat_id: chatId, message_id: groupMessageId }
+                { chat_id: chatId, message_id: groupMessageId }
             );
         }
         else {

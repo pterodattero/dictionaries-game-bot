@@ -25,7 +25,7 @@
         },
         "startMessage": "Turno %{round}/%{totalRounds}\n%{leader} deve scegliere una parola!",
         "leader": {
-            "word": "È il tuo turno per decidere una parola per la chat %{group}! Rispondi a questo messaggio con la tua scelta.",
+            "word": "È il tuo turno per decidere una parola per la chat %{chat}! Rispondi a questo messaggio con la tua scelta.",
             "definition": "Perfetto. Ora rispondi a questo messaggio con la definizione corretta di %{word}."
         },
         "player": {
