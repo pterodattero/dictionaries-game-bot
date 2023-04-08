@@ -25,6 +25,11 @@ const handleCommand = async (msg: Message, language: string) => {
                 await LanguageUtils.languageCommand(msg);
                 break;
             case 'about':
+                await CommandUtils.aboutCommand(msg);
+                break;
+            case 'donate':
+                await CommandUtils.donateCommand(msg);
+                break;
             default:
         }
     }

@@ -38,4 +38,12 @@ export namespace CommandUtils {
         await global.bot.sendMessage(msg.chat.id, helpText);
     }
 
+    export const aboutCommand = async (msg: Message) => {
+        await global.bot.sendMessage(msg.chat.id, global.polyglot.t('about'), { parse_mode: "Markdown" });
+    }
+
+    export const donateCommand = async (msg: Message) => {
+        await global.bot.sendMessage(msg.chat.id, global.polyglot.t('donate'));
+    }
+
 }

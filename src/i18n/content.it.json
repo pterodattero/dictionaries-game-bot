@@ -44,5 +44,7 @@
         "noGroup": "Questo comando può essere usato solo nei gruppi",
         "select": "",
         "done": "Linguaggio impostato a italiano"
-    }
+    },
+    "about": "Questo progetto è open source. Dai un'occhiata su [GitHub](https://github.com/pterodattero/dictionaries-game-bot)",
+    "donate": "Non mi sento pronto per ricevere soldi veri, ma apprezzo il pensiero ❤️"
 }
