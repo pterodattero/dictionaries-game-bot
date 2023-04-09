@@ -22,7 +22,7 @@ export interface IGame {
     status: Status,
     round?: number,
     word?: string,
-    indexes: number[],
+    indexes: number[], // index map: pollPosition -> playerIndex
 }
 
 const PlayerSchema = new Schema<IPlayer>({

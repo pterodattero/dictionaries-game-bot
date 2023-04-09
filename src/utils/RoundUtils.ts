@@ -87,7 +87,7 @@ export namespace RoundUtils {
                 break;
             }
             const currentMedalNames = (await Promise.all(orderedScoreGroups[i][1].map((userId) => global.bot.getChatMember(chatId, userId))))
-                .map(member => member.user.username);
+                .map(member => GenericUtils.getUserLabel(member.user));
             message += `\n${medals[i]} ${currentMedalNames.join(', ')}: ${orderedScoreGroups[i][0]} `;
         }
         await global.bot.sendMessage(chatId, message);
@@ -119,7 +119,7 @@ export namespace RoundUtils {
         for (const userId of players) {
             const text = (userId == msg.from.id)
                 ? global.polyglot.t('round.leader.definition', { word })
-                : global.polyglot.t('round.player.definition', { word, leader: msg.from.username });
+                : global.polyglot.t('round.player.definition', { word, leader: GenericUtils.getUserLabel(msg.from) });
             const message = await global.bot.sendMessage(
                 userId,
                 text,
@@ -153,7 +153,7 @@ export namespace RoundUtils {
         // Get new definition
         const definition = msg.text;
         if (definition.length > MAX_POLL_OPTION_LENGTH) {
-            global.bot.sendMessage(msg.from.id, global.polyglot.t('tooLongDefinitionError', { maxLength: MAX_POLL_OPTION_LENGTH }));
+            global.bot.sendMessage(msg.from.id, global.polyglot.t('round.tooLongDefinitionError', { maxLength: MAX_POLL_OPTION_LENGTH }));
             return;
         }
         await Controller.setDefinition(chatId, msg.from.id, definition);
@@ -280,8 +280,9 @@ export namespace RoundUtils {
             // send result
             let message = global.polyglot.t('round.scoreboard');
             for (const userId in newScore) {
-                const playerName = (await global.bot.getChatMember(chatId, Number(userId))).user.username;
-                message += `\n${playerName} \t${oldScore[Number(userId)]} \t + ${roundPoints[Number(userId)]} \t = ${newScore[Number(userId)]} `;
+                const member = await global.bot.getChatMember(chatId, Number(userId));
+                const playerName = GenericUtils.getUserLabel(member.user);
+                message += `\n${playerName} ${oldScore[Number(userId)]} + ${roundPoints[Number(userId)]} = ${newScore[Number(userId)]}`;
             }
             await global.bot.sendMessage(chatId, message);
 
