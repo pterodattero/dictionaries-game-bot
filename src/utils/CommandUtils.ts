@@ -2,14 +2,18 @@ import { Message } from "node-telegram-bot-api";
 
 import { Controller } from "../controller";
 import { Status } from "../models/Game";
+import { Language, LanguageUtils } from "./LanguageUtils";
 import { PreparationUtils } from "./PreparationUtils";
 
 export namespace CommandUtils {
 
     export const startCommand = async (msg: Message) => {
-        // If chat is not a group tell the player to add it to a group
         if (msg.chat.type !== "group") {
-            await global.bot.sendMessage(msg.chat.id, global.polyglot.t('command.startError'));
+            if (!(await Controller.isChatInitialized(msg.chat.id))) {
+                return LanguageUtils.languageCommand(msg);
+            } else {
+                return global.bot.sendMessage(msg.chat.id, global.polyglot.t('command.startError'));
+            }
         }
         else {
             await PreparationUtils.startPreparation(msg);
