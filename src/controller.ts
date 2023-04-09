@@ -34,6 +34,10 @@ export namespace Controller {
         return result?.language ?? 'en';
     }
 
+    export async function isChatInitialized(chatId: number) {
+        return !!await Settings.findOne({ chatId });
+    }
+
     export async function setLanguange(chatId: number, language: string) {
         await Settings.replaceOne({ chatId }, { chatId, language }, { upsert: true });
     }
