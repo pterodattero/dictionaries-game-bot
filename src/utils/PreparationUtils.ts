@@ -36,7 +36,7 @@ export namespace PreparationUtils {
             await global.bot.deleteMessage(query.from.id, message.message_id);
         }
         catch (err) {
-            await global.bot.answerCallbackQuery(query.id, { text: global.polyglot.t('prepare.interactionError') });
+            await global.bot.answerCallbackQuery(query.id, { text: global.polyglot.t('prepare.interactionError'), show_alert: true });
             return;
         }
 

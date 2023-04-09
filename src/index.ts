@@ -17,7 +17,12 @@ async function main() {
             console.log(`${ updates.length } update(s) received`)
         }
         for (const update of updates) {
-            await handleUpdate(update);
+            try {
+                await handleUpdate(update);
+            }
+            catch (error) {
+                console.error(error);
+            }
         }
     }, 1000);
 }

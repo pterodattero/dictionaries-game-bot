@@ -40,46 +40,30 @@ const handleCommand = async (msg: Message, language: string) => {
 };
 
 const handleCallbackQuery = async (query: CallbackQuery) => {
-    try {
-        switch (query.data) {
-            case 'prepare:join':
-                await PreparationUtils.join(query);
-                break;
-            case 'prepare:withdraw':
-                await PreparationUtils.withdraw(query);
-                break;
-            case 'prepare:continue':
-                await RoundUtils.startGame(query);
-                break;
-            default:
-                if (query.data?.startsWith('language:')) {
-                    await LanguageUtils.languageCallback(query);
-                } else {
-                    await global.bot.sendMessage(query.chat_instance, "Unrecognized query data");
-                }
+    if (query.data) {
+        try {
+            const [ prefix, suffix ] = query.data.split(':');
+            switch (prefix) {
+                case 'prepare':
+                    switch (suffix) {
+                        case 'join':
+                            return PreparationUtils.join(query);
+                        case 'withdraw':
+                            return PreparationUtils.withdraw(query);
+                        case 'continue':
+                            return RoundUtils.startGame(query);
+                    }
+                case 'language':
+                    return LanguageUtils.languageCallback(query);
+                case 'poll':
+                    return RoundUtils.answer(query);
+                default:
+                    return global.bot.sendMessage(query.chat_instance, "Unrecognized query data");
+            }
         }
-    }
-    catch (err) {
-        console.error(err);
-    }
-}
-
-
-const handlePollAnswer = async (pollAnswer: PollAnswer) => {
-    try {
-        const res = await Controller.getPollInteraction(pollAnswer.poll_id);
-        if (!res) {
-            return;
+        catch (err) {
+            console.error(err);
         }
-        const { chatId } = res;
-    
-        const status = await Controller.getGameStatus(chatId);
-        if (status === Status.POLL) {
-            await RoundUtils.answer(pollAnswer);
-        }
-    }
-    catch (err) {
-        console.error(err);
     }
 }
 
@@ -124,7 +108,6 @@ const handleText = async (msg: Message) => {
 const inferLanguageFromUpdate = async (update: Update) => {
     const chatId = update.message?.chat.type === 'group' ? update.message?.chat.id
         : update.callback_query ? update.callback_query.message?.chat.id
-        : update.poll_answer ? (await Controller.getPollInteraction(update.poll_answer.poll_id))?.chatId
         : update.message?.reply_to_message?.from && update.message.from ? (await Controller.getMessageInteraction(update.message.reply_to_message.message_id, update.message.from.id))?.chatId
         : update.message?.from?.id;
     const language = await Controller.getLanguange(chatId);
@@ -141,8 +124,6 @@ const handleUpdate = async (update: Update) => {
         await handleCommand(update.message, language);
     } else if (update.callback_query) {
         await handleCallbackQuery(update.callback_query);
-    } else if (update.poll_answer) {
-        await handlePollAnswer(update.poll_answer);
     } else if (update.message) {
         await handleText(update.message);
     }
