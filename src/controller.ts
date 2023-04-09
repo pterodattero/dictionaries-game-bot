@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import Game, { IGame, Status } from "./models/Game";
 import MessageInteraction from "./models/MessageInteraction";
-import PollInteraction from "./models/PollInteraction";
 import Settings from "./models/Settings";
 
 
@@ -61,24 +60,6 @@ export namespace Controller {
             }
     }
 
-    export async function setPollInteraction(pollId: string, chatId: number, messageId: number): Promise<void> {
-        await PollInteraction.create({ pollId, chatId, messageId });
-    }
-
-    export async function unsetPollInteraction(pollId: string): Promise<void> {
-        if (await getPollInteraction(pollId))
-            PollInteraction.deleteOne({ pollId });
-    }
-
-    export async function getPollInteraction(pollId: string): Promise<{ chatId: number, messageId: number } | undefined> {
-        const interaction = await PollInteraction.findOne({ pollId });
-        if (interaction) {
-            return {
-                chatId: interaction.chatId,
-                messageId: interaction.messageId,
-            };
-        }
-    }
 
     // Game methods
     export async function initGame(chatId: number): Promise<void> {
@@ -204,11 +185,11 @@ export namespace Controller {
         await game.save();
     }
 
-    export async function getDefinitions(chatId: number): Promise<string[]> {
+    export async function getDefinitions(chatId: number): Promise<{userId: number, definition: string}[]> {
         const game = await getGame(chatId);
         if (!game.indexes)
             throw Error('Indexes not initialized');
-        return game.indexes.map((index) => game.players[index].definition ?? '');
+        return game.indexes.map((index) => ({ userId: game.players[index].userId, definition: game.players[index].definition ?? ''}));
     }
 
     export async function numberOfDefinitions(chatId: number): Promise<number> {
@@ -216,11 +197,8 @@ export namespace Controller {
         return game.players.filter((player) => player.definition).length;
     }
 
-    export async function shuffleDefinitions(chatId: number): Promise<number> {
+    export async function shuffleDefinitions(chatId: number) {
         const game = await getGame(chatId);
-        if (game.round === undefined)
-            throw Error('No round in act');
-
         const indexes = [...Array(await numberOfPlayers(chatId)).keys()];
         for (let i = indexes.length - 1; i > 0; i--) {
             let j = Math.floor(Math.random() * (i + 1));
@@ -229,7 +207,6 @@ export namespace Controller {
 
         game.indexes = indexes;
         await game.save();
-        return indexes.indexOf(game.round);
     }
 
     export async function getMissingPlayers(chatId: number): Promise<number[]> {
@@ -243,14 +220,10 @@ export namespace Controller {
     }
 
     // Vote methods
-    export async function addVote(chatId: number, userId: number, index: number): Promise<void> {
+    export async function addVote(chatId: number, userId: number, vote: number): Promise<void> {
         const game = await getGame(chatId);
-        if (!game.indexes)
-            throw Error('Invalid game');
-
         const playerIndex = game.players.findIndex((player) => player.userId === userId);
-
-        game.players[playerIndex].vote = game.players[game.indexes[index]].userId;
+        game.players[playerIndex].vote = vote;
         await game.save();
     }
 

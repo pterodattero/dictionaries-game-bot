@@ -1,4 +1,4 @@
-import TelegramBot, { CallbackQuery, InlineKeyboardMarkup, Message, PollAnswer } from "node-telegram-bot-api";
+import TelegramBot, { CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Message, PollAnswer } from "node-telegram-bot-api";
 import Fs from 'fs/promises';
 import Path from 'path';
 
@@ -6,9 +6,6 @@ import { Controller } from "../controller"
 import { Status } from "../models/Game";
 import { GenericUtils } from "./GenericUtils";
 
-
-const MAX_POLL_DESCRIPTION_LENGTH = 255;
-const MAX_POLL_OPTION_LENGTH = 100;
 
 export namespace RoundUtils {
 
@@ -19,7 +16,7 @@ export namespace RoundUtils {
             throw "Invalid query";
         }
         if (!(await Controller.getPlayers(chatId)).includes(query.from.id)) {
-            return global.bot.answerCallbackQuery(query.id, { text: global.polyglot.t('prepare.nonJoinedContinue') });
+            return global.bot.answerCallbackQuery(query.id, { text: global.polyglot.t('prepare.nonJoinedContinue'), show_alert: true });
         }
         await global.bot.answerCallbackQuery(query.id);
         await global.bot.editMessageText(global.polyglot.t('prepare.gameStarted'), { chat_id: chatId, message_id: query.message?.message_id });
@@ -60,7 +57,6 @@ export namespace RoundUtils {
                 {
                     reply_markup: {
                         force_reply: true,
-                        input_field_placeholder: global.polyglot.t('round.maxLength', { maxLength: MAX_POLL_DESCRIPTION_LENGTH }),
                         inline_keyboard: [resources],
                     }
                 }
@@ -106,10 +102,6 @@ export namespace RoundUtils {
 
         // Get new word
         const word = msg.text;
-        if (word.length > MAX_POLL_DESCRIPTION_LENGTH) {
-            global.bot.sendMessage(msg.from.id, global.polyglot.t('tooLongWordError', { maxLength: MAX_POLL_DESCRIPTION_LENGTH }));
-            return;
-        }
         await Controller.setWord(chatId, word);
         await Controller.setGameStatus(chatId, Status.ANSWER);
 
@@ -126,7 +118,6 @@ export namespace RoundUtils {
                 {
                     reply_markup: {
                         force_reply: true,
-                        input_field_placeholder: global.polyglot.t('round.maxLength', { maxLength: MAX_POLL_OPTION_LENGTH })
                     }
                 }
             );
@@ -152,10 +143,6 @@ export namespace RoundUtils {
 
         // Get new definition
         const definition = msg.text;
-        if (definition.length > MAX_POLL_OPTION_LENGTH) {
-            global.bot.sendMessage(msg.from.id, global.polyglot.t('round.tooLongDefinitionError', { maxLength: MAX_POLL_OPTION_LENGTH }));
-            return;
-        }
         await Controller.setDefinition(chatId, msg.from.id, definition);
         await Controller.setGameStatus(chatId, Status.ANSWER);
 
@@ -217,59 +204,62 @@ export namespace RoundUtils {
 
     // Send poll with definitions
     export const sendPoll = async (chatId: number) => {
-        // shuffle and retrieve definitions
-        const word = await Controller.getWord(chatId);
-        const correctOptionId = await Controller.shuffleDefinitions(chatId);
+        await Controller.shuffleDefinitions(chatId);
         const definitions = await Controller.getDefinitions(chatId);
 
-        if (process.env.NODE_ENV === 'development' && await Controller.numberOfPlayers(chatId) == 1) {
-            definitions.push('Stub definition');
-        }
+        const MAX_BUTTONS_IN_ROW = 5;
 
-        // send poll
-        const message = await global.bot.sendPoll(
-            chatId,
-            global.polyglot.t('round.poll', { word }),
-            definitions,
-            {
-                correct_option_id: correctOptionId,
-                is_anonymous: false,
-                type: "quiz",
+        const keyboard: InlineKeyboardButton[][] = [];
+        for (let i = 0; i < definitions.length; i++) {
+            if (i % MAX_BUTTONS_IN_ROW === 0) {
+                keyboard.push([]);
             }
-        );
-        if (!message.poll?.id) {
-            throw "Error during poll creation";
+            keyboard[keyboard.length - 1].push({ text: String(i + 1), callback_data: `poll:${definitions[i].userId}` })
         }
 
-        await Controller.setPollInteraction(message.poll.id, chatId, message.message_id);
+        global.bot.sendMessage(
+            chatId,
+            await getPollMessage(chatId),
+            {
+                reply_markup: {
+                    inline_keyboard: keyboard
+                }
+            }
+        )
     }
 
 
     // Read poll answers and when completed post scores
-    export const answer = async (pollAnswer: PollAnswer) => {
-        const res = await Controller.getPollInteraction(pollAnswer.poll_id);
-        if (!res) {
-            return;
+    export const answer = async (query: CallbackQuery) => {
+        const chatId = query.message?.chat.id;
+        if (!chatId || !query.data) {
+            throw "Invalid query";
         }
-        const { chatId, messageId } = res;
-
+        const [ players, leader ] = await Promise.all([
+            Controller.getPlayers(chatId),
+            Controller.getCurrentPlayer(chatId),
+        ]);
+        
         // ignore votes of non playing members and leader
-        const players = await Controller.getPlayers(chatId);
-        if (!players.includes(pollAnswer.user.id) || (pollAnswer.user.id == (await Controller.getCurrentPlayer(chatId)) && process.env.NODE_ENV !== 'development')) {
-            try {
-                await global.bot.sendMessage(pollAnswer.user.id, global.polyglot.t('round.pollIntermission'));
-            }
-            catch (err) {
-                // do nothing
-            }
-            return;
+        if (!players.includes(query.from.id)) {
+            return global.bot.answerCallbackQuery(query.id, { text: global.polyglot.t('round.pollIntermission'), show_alert: true })
         }
-
-        await Controller.addVote(chatId, pollAnswer.user.id, pollAnswer.option_ids[0]);
+        if (query.from.id === leader) {
+            return global.bot.answerCallbackQuery(query.id, { text: global.polyglot.t('round.pollLeaderIntermission'), show_alert: true })
+        }
+        const vote = Number(query.data.split(':')[1]);
+        if (query.from.id === vote) {
+            return global.bot.answerCallbackQuery(query.id, { text: global.polyglot.t('round.autoVote'), show_alert: true })
+        }
+        await global.bot.answerCallbackQuery(query.id, { text: global.polyglot.t('round.voteRegistered') })
+        await Controller.addVote(chatId, query.from.id, vote);
 
         if ((await Controller.numberOfVotes(chatId)) >= (await Controller.numberOfPlayers(chatId)) - 1) {
             // close poll
-            await global.bot.stopPoll(chatId, messageId);
+            await global.bot.editMessageText(
+                await getPollMessage(chatId, true),
+                { chat_id: chatId, message_id: query.message?.message_id },
+            );            
 
             // update scores
             const roundPoints = await Controller.getRoundPoints(chatId);
@@ -288,7 +278,6 @@ export namespace RoundUtils {
 
             // start new round
             await newRound(chatId);
-            await Controller.unsetPollInteraction(pollAnswer.poll_id);
         }
     }
 
@@ -297,6 +286,30 @@ export namespace RoundUtils {
         return {
             inline_keyboard: [[{ text: 'Check bot chat', url: `https://t.me/${(await global.bot.getMe()).username}` }]]
         } as InlineKeyboardMarkup;
+    }
+
+    const getPollMessage = async (chatId: number, solution: boolean = false) => {
+        const [ definitions, round, word ] = await Promise.all([
+            Controller.getDefinitions(chatId),
+            Controller.getRound(chatId),
+            Controller.getWord(chatId),
+        ]) 
+
+        let text = global.polyglot.t('round.poll', { word });
+        for (let i = 0; i < definitions.length; i++) {
+            const isLeader = i === round;
+            text += `\n${i + 1}. `;
+            if (solution) {
+                text += isLeader ? '✔️ ' : '❌ ';
+            }
+            
+            text += definitions[i].definition;
+            if (solution) {
+                text += `(${ GenericUtils.getUserLabel((await global.bot.getChatMember(chatId, definitions[i].userId)).user) })`;
+            }
+        }
+
+        return text;
     }
 
 }

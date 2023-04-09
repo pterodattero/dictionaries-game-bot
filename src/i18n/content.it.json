@@ -38,6 +38,9 @@
         "tooLongDefinitionError": "Una definizione può essere al massimo lunga %{maxLength} caratteri.",
         "poll": "Qual'è la definizione corretta di %{word}?",
         "pollIntermission": "Non stai giocando in questo gioco, il tuo voto non sarà considerato",
+        "pollLeaderIntermission": "Non stai giocando in questo turno, il tuo voto non sarà considerato",
+        "autoVote": "Non puoi autovotarti",
+        "voteRegistered": "Voto registrato, aspetta che votino anche gli altri giocatori",
         "scoreboard": "Punteggio:",
         "invalidInteraction": "Mi dispiace, questo messaggio non è più attivo."
     },
