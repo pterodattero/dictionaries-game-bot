@@ -246,7 +246,7 @@ export namespace Controller {
 
         const playerIndex = game.players.findIndex((player) => player.userId === userId);
 
-        game.players[playerIndex].vote = game.players[game.indexes.indexOf(index)].userId;
+        game.players[playerIndex].vote = game.players[game.indexes[index]].userId;
         await game.save();
     }
 
@@ -270,8 +270,8 @@ export namespace Controller {
         // Guess points
         for (const player of game.players) {
             if (player.userId === leaderId) {
-                roundPoints[player.userId] += everyoneGuessed ? NOT_EVERYONE_GUESSED_LEADER_POINTS : EVERYONE_GUESSED_LEADER_POINTS;
-            } else {
+                roundPoints[player.userId] += everyoneGuessed ? EVERYONE_GUESSED_LEADER_POINTS : NOT_EVERYONE_GUESSED_LEADER_POINTS;
+            } else if (player.vote === leaderId) {
                 roundPoints[player.userId] += everyoneGuessed ? EVERYONE_GUESSED_POINTS : GUESS_POINTS;
             }
         }
