@@ -5,18 +5,19 @@
         "welcome": "You have authorized me to PM with you. If you want to join a game that has already started just go back to group chat and now you can tap **Join**. If you want to start a game with your friends add me to your group chat and use /start command."
     },
     "prepare": {
-        "start": "Heads up, time to join! Between %{minPlayers} and %{maxPlayers} are required to play. If you haven't allowed PM yet you have to do it now. Once everyone who wants to play has joined, press the continue button to start.",
+        "start": "Heads up, time to join! Between %{minPlayers} and %{maxPlayers} are required to play. If you haven't authorized PM yet you have to do it now. Once everyone who wants to play has joined, press the continue button to start.",
         "playersAlreadyJoined": "%{playersList} already joined.",
         "refuse": "A game is already going on in this chat.",
         "interactionTry": "Trying to interact with you...",
-        "interactionError": "Please register before joining",
+        "interactionError": "Please authorize PM before joining",
         "alreadyJoined": "You have already joined",
         "notJoined": "You haven't joined yet",
         "keyboard": {
             "join": "Join (%{availableSlots})",
             "withdraw": "Withdraw",
             "continue": "Start",
-            "register": "Register for PM"
+            "register": "Authorize PM",
+            "testVersionError": "You're using an experimental version, developmer must partecipate to the game."
         },
         "gameStarted": "Game started!",
         "nonJoinedContinue": "You have to join to start a game"
