@@ -59,8 +59,8 @@
         "doneGroup": "Language set to English for this group. Also private messages related to this group will be in this language. If you want to change language also in game independent PMs use /language command in bot chat.",
         "donePrivate": "Language set to English. This settings does not affect language used in games, which has to be set in the corresponding group with /language command."
     },
-    "about": "This project is open source. Check it out on [GitHub](https://github.com/pterodattero/dictionaries-game-bot).",
-    "donate": "I don't feel ready yet for asking real money, but I appreciate your intent ❤️",
+    "about": "This project is open source. If you want to contribute with proposals, issue reports, new features or translations take a look at [this repository](https://github.com/pterodattero/dictionaries-game-bot). If you enjoyed playing consider a donation with /donate command.",
+    "donate": "Support the developer! This project is not made for profict, but financial support is appreciated ❤️",
     "command": {
         "stop": "Game stopped.",
         "stopInGroup": "This command can be used only in group chats."

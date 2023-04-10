@@ -52,7 +52,14 @@ export namespace CommandController {
     }
 
     export const donateCommand = async (msg: Message) => {
-        await global.bot.sendMessage(msg.chat.id, global.polyglot.t('donate'));
+        return global.bot.sendMessage(msg.chat.id, global.polyglot.t('donate'), {
+            reply_markup: {
+                inline_keyboard: [[
+                    { text: "Paypal", url: process.env.PAYPAL_URL },
+                    { text: "Liberapay", url: process.env.LIBERAPAY_URL },
+                ]]
+            }
+        })
     }
 
 }
