@@ -61,7 +61,7 @@ const handleCallbackQuery = async (query: CallbackQuery) => {
                 case 'poll':
                     return RoundUtils.answer(query);
                 default:
-                    return global.bot.sendMessage(query.message.chat.id, "Unrecognized query data");
+                    throw 'Unrecognized query data';
             }
         }
         catch (err) {

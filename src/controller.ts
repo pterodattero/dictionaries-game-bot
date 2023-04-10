@@ -214,8 +214,9 @@ export namespace Controller {
         if (game.round === undefined)
             throw Error('No round in act');
 
+        const leaderId = await getCurrentPlayer(chatId);
         return game.players
-            .filter((playerData) => !playerData.definition)
+            .filter((playerData) => game.status === Status.ANSWER ? !playerData.definition : (!playerData.vote) && playerData.userId !== leaderId )
             .map((playerData) => playerData.userId);
     }
 

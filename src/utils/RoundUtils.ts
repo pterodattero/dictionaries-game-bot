@@ -185,9 +185,7 @@ export namespace RoundUtils {
 
     const editGroupMessage = async (chatId: number, groupMessageId: number) => {
         // Update round message on group chat
-        const missingPlayersIds = await Controller.getMissingPlayers(chatId);
-        const members = await Promise.all(missingPlayersIds.map(((userId) => global.bot.getChatMember(chatId, userId))));
-        const missingPlayers = members.map((member) => GenericUtils.getUserLabel(member.user));
+        const missingPlayersString = 
         await global.bot.editMessageText(
             [
                 global.polyglot.t('round.group.round', {
@@ -195,7 +193,7 @@ export namespace RoundUtils {
                     totalRounds: await Controller.numberOfPlayers(chatId),
                 }),
                 global.polyglot.t('round.group.definition', {
-                    missingPlayers: missingPlayers.join(', ')
+                    missingPlayers: await getMissingPlayersString(chatId)
                 })
             ].join('\n'),
             { reply_markup: await getCheckBotChatReplyMarkup(), chat_id: chatId, message_id: groupMessageId }
@@ -220,11 +218,7 @@ export namespace RoundUtils {
         global.bot.sendMessage(
             chatId,
             await getPollMessage(chatId),
-            {
-                reply_markup: {
-                    inline_keyboard: keyboard
-                }
-            }
+            { reply_markup: { inline_keyboard: keyboard }, parse_mode: 'Markdown' }
         )
     }
 
@@ -258,7 +252,7 @@ export namespace RoundUtils {
             // close poll
             await global.bot.editMessageText(
                 await getPollMessage(chatId, true),
-                { chat_id: chatId, message_id: query.message?.message_id },
+                { chat_id: chatId, message_id: query.message?.message_id, parse_mode: 'Markdown' },
             );            
 
             // update scores
@@ -284,7 +278,7 @@ export namespace RoundUtils {
 
     const getCheckBotChatReplyMarkup = async () => {
         return {
-            inline_keyboard: [[{ text: 'Check bot chat', url: `https://t.me/${(await global.bot.getMe()).username}` }]]
+            inline_keyboard: [[{ text: global.polyglot.t('round.group.checkBotChat'), url: `https://t.me/${(await global.bot.getMe()).username}` }]]
         } as InlineKeyboardMarkup;
     }
 
@@ -298,18 +292,33 @@ export namespace RoundUtils {
         let text = global.polyglot.t('round.poll', { word });
         for (let i = 0; i < definitions.length; i++) {
             const isLeader = i === round;
-            text += `\n${i + 1}. `;
+            text += '\n';
             if (solution) {
                 text += isLeader ? '✔️ ' : '❌ ';
+            } else {
+                text += `${i + 1}. `;
             }
             
             text += definitions[i].definition;
             if (solution) {
-                text += `(${ GenericUtils.getUserLabel((await global.bot.getChatMember(chatId, definitions[i].userId)).user) })`;
+                text += ` - **${ GenericUtils.getUserLabel((await global.bot.getChatMember(chatId, definitions[i].userId)).user) }**`;
             }
         }
 
+        if (!solution) {
+            text += `\n\n ${global.polyglot.t('round.group.voteMissing', {
+                missingPlayers: await getMissingPlayersString(chatId)
+            })}`;
+        }
+
         return text;
+    }
+
+    const getMissingPlayersString = async (chatId: number) => {
+        const missingPlayersIds = await Controller.getMissingPlayers(chatId);
+        const members = await Promise.all(missingPlayersIds.map(((userId) => global.bot.getChatMember(chatId, userId))));
+        const missingPlayers = members.map((member) => GenericUtils.getUserLabel(member.user));
+        return missingPlayers.join(', ');
     }
 
 }
