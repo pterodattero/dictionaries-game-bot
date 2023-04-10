@@ -11,14 +11,17 @@ export enum Language {
 
 export namespace LanguageUtils {
 
-    export const languageCommand = async (msg: Message) => {
-        const text = global.polyglot.t(msg.chat.type === 'group' ? 'language.selectGroup' : 'language.selectPrivate');
+    export const languageCommand = async (msg: Message, callbackPrefix: string = 'language') => {
+        const text = global.polyglot.t('language.select');
         await global.bot.sendMessage(
             msg.chat.id, text,
             {
                 reply_markup: {
                     inline_keyboard: [
-                        [{ text: "English", callback_data: `language:${Language.ENGLISH}` }, { text: "Italiano", callback_data: `language:${Language.ITALIAN}` }],
+                        [
+                            { text: "English", callback_data: `${callbackPrefix}:${Language.ENGLISH}` },
+                            { text: "Italiano", callback_data: `${callbackPrefix}:${Language.ITALIAN}` }
+                        ],
                     ]
                 }
             }
@@ -32,7 +35,11 @@ export namespace LanguageUtils {
             await Controller.setLanguange(chatId, language);
             await global.bot.answerCallbackQuery(query.id);
             await I18n.init(language);
-            await global.bot.editMessageText(global.polyglot.t('language.done'), { chat_id: chatId, message_id: query.message?.message_id });
+            const isGroup = query.message?.chat.type === 'group';
+            await global.bot.editMessageText(
+                global.polyglot.t(isGroup ? 'language.doneGroup' : 'language.donePrivate'),
+                { chat_id: chatId, message_id: query.message?.message_id }
+            );
         }
     }
 

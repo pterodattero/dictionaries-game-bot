@@ -10,9 +10,9 @@ export namespace CommandUtils {
     export const startCommand = async (msg: Message) => {
         if (msg.chat.type !== "group") {
             if (!(await Controller.isChatInitialized(msg.chat.id))) {
-                return LanguageUtils.languageCommand(msg);
+                return LanguageUtils.languageCommand(msg, 'start');
             } else {
-                return global.bot.sendMessage(msg.chat.id, global.polyglot.t('command.startError'));
+                return global.bot.sendMessage(msg.chat.id, global.polyglot.t('start.error'));
             }
         }
         else {
@@ -27,7 +27,7 @@ export namespace CommandUtils {
             await global.bot.sendMessage(msg.chat.id, global.polyglot.t('command.stop'));
         }
         else {
-            await global.bot.sendMessage(msg.chat.id, global.polyglot.t('command.startNoGame'));
+            await global.bot.sendMessage(msg.chat.id, global.polyglot.t('start.noGame'));
         }
     }
 

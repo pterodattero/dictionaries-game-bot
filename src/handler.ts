@@ -40,7 +40,7 @@ const handleCommand = async (msg: Message, language: string) => {
 };
 
 const handleCallbackQuery = async (query: CallbackQuery) => {
-    if (query.data) {
+    if (query.data && query.message) {
         try {
             const [ prefix, suffix ] = query.data.split(':');
             switch (prefix) {
@@ -55,10 +55,13 @@ const handleCallbackQuery = async (query: CallbackQuery) => {
                     }
                 case 'language':
                     return LanguageUtils.languageCallback(query);
+                case 'start':
+                    await LanguageUtils.languageCallback(query);
+                    return global.bot.sendMessage(query.message.chat.id, global.polyglot.t('start.welcome'), { parse_mode: 'Markdown' });
                 case 'poll':
                     return RoundUtils.answer(query);
                 default:
-                    return global.bot.sendMessage(query.chat_instance, "Unrecognized query data");
+                    return global.bot.sendMessage(query.message.chat.id, "Unrecognized query data");
             }
         }
         catch (err) {
