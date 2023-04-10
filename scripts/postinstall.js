@@ -3,10 +3,10 @@ const secret = process.env.WEBHOOK_SECRET;
 
 async function main() {
     if (!token) {
-        "Missing token";
+        throw "Missing token";
     }
     if (!secret) {
-        "Missing secret";
+        throw "Missing secret";
     }
     const result = await fetch(`https://api.telegram.org/bot${ token }/setWebhook`,
         {
@@ -15,7 +15,7 @@ async function main() {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                url: 'https://dictionaries-game-bot-pterodattero.vercel.app/api/webhook',
+                url: `https://${ process.env.VERCEL_URL }/api/webhook`,
                 secret_token: secret,
             })
         }
@@ -24,6 +24,6 @@ async function main() {
     console.log(await result.json());
 }
 
-if (process.env.NODE_ENV !== 'development') {
+if (process.env.VERCEL_ENV && process.env.VERCEL_ENV !== 'development' ) {
     main();
 }

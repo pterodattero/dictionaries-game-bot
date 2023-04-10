@@ -1,5 +1,5 @@
 import { Message, CallbackQuery } from 'node-telegram-bot-api';
-import { Controller } from '../controller';
+import { Model } from '../model/Model';
 import * as I18n from '../i18n';
 
 
@@ -9,7 +9,7 @@ export enum Language {
 }
 
 
-export namespace LanguageUtils {
+export namespace LanguageController {
 
     export const languageCommand = async (msg: Message, callbackPrefix: string = 'language') => {
         const text = global.polyglot.t('language.select');
@@ -32,7 +32,7 @@ export namespace LanguageUtils {
         const chatId = query.message?.chat.id;
         const language = query.data?.substring(query.data.indexOf(':') + 1) ?? 'en';
         if (chatId) {
-            await Controller.setLanguange(chatId, language);
+            await Model.setLanguange(chatId, language);
             await global.bot.answerCallbackQuery(query.id);
             await I18n.init(language);
             const isGroup = query.message?.chat.type === 'group';

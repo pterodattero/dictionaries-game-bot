@@ -1,11 +1,11 @@
 import mongoose from "mongoose";
-import Game, { IGame, Status } from "./models/Game";
-import MessageInteraction from "./models/MessageInteraction";
-import Settings from "./models/Settings";
+import Game, { IGame, Status } from "./Game";
+import MessageInteraction from "./MessageInteraction";
+import Settings from "./Settings";
 
 
 
-export namespace Controller {
+export namespace Model {
     // constants
     export const MIN_PLAYERS = 4;
     export const MAX_PLAYERS = 10;
