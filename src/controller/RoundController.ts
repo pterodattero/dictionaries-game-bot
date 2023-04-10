@@ -2,12 +2,12 @@ import TelegramBot, { CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup,
 import Fs from 'fs/promises';
 import Path from 'path';
 
-import { Controller } from "../controller"
-import { Status } from "../models/Game";
-import { GenericUtils } from "./GenericUtils";
+import { Model } from "../model/Model"
+import { Status } from "../model/Game";
+import { Utils } from "./Utils";
 
 
-export namespace RoundUtils {
+export namespace RoundController {
 
     // Check if game is ready and start the first round
     export const startGame = async (query: CallbackQuery) => {
@@ -15,7 +15,7 @@ export namespace RoundUtils {
         if (!chatId) {
             throw "Invalid query";
         }
-        if (!(await Controller.getPlayers(chatId)).includes(query.from.id)) {
+        if (!(await Model.getPlayers(chatId)).includes(query.from.id)) {
             return global.bot.answerCallbackQuery(query.id, { text: global.polyglot.t('prepare.nonJoinedContinue'), show_alert: true });
         }
         await global.bot.answerCallbackQuery(query.id);
@@ -25,31 +25,31 @@ export namespace RoundUtils {
 
     // Start a new round
     export const newRound = async (chatId: number) => {
-        if (!(await Controller.newRound(chatId))) {
+        if (!(await Model.newRound(chatId))) {
             // Give prizes
             await finalScoreboard(chatId);
         }
         else {
-            await Controller.setGameStatus(chatId, Status.QUESTION);
+            await Model.setGameStatus(chatId, Status.QUESTION);
 
             // Notify on group who is the leader
-            const leader = (await global.bot.getChatMember(chatId, await Controller.getCurrentPlayer(chatId))).user;
+            const leader = (await global.bot.getChatMember(chatId, await Model.getCurrentPlayer(chatId))).user;
             const groupMessage = await global.bot.sendMessage(
                 chatId,
                 [
                     global.polyglot.t('round.group.round', {
-                        round: (await Controller.getRound(chatId) ?? 0) + 1,
-                        totalRounds: await Controller.numberOfPlayers(chatId),
+                        round: (await Model.getRound(chatId) ?? 0) + 1,
+                        totalRounds: await Model.numberOfPlayers(chatId),
                     }),
                     global.polyglot.t('round.group.word', {
-                        leader: GenericUtils.getUserLabel(leader),
+                        leader: Utils.getUserLabel(leader),
                     })
                 ].join('\n'),
                 { reply_markup: await getCheckBotChatReplyMarkup() }
             );
 
             // Contact privately the leader
-            const language = await Controller.getLanguange(chatId);
+            const language = await Model.getLanguange(chatId);
             const resources: { text: string, url: string }[] = JSON.parse((await Fs.readFile(Path.resolve(__dirname, '../i18n', `resources.${language}.json`))).toString());
             const message = await global.bot.sendMessage(
                 leader.id,
@@ -61,12 +61,12 @@ export namespace RoundUtils {
                     }
                 }
             );
-            await Controller.setMessageInteraction(message.message_id, leader.id, chatId, groupMessage.message_id);
+            await Model.setMessageInteraction(message.message_id, leader.id, chatId, groupMessage.message_id);
         }
     }
 
     const finalScoreboard = async (chatId: number) => {
-        const scores = await Controller.getScores(chatId);
+        const scores = await Model.getScores(chatId);
         const scoreGroups: { [score: number]: number[]; } = {};
         for (const userId in scores) {
             if (!scoreGroups[scores[userId]]) {
@@ -83,7 +83,7 @@ export namespace RoundUtils {
                 break;
             }
             const currentMedalNames = (await Promise.all(orderedScoreGroups[i][1].map((userId) => global.bot.getChatMember(chatId, userId))))
-                .map(member => GenericUtils.getUserLabel(member.user));
+                .map(member => Utils.getUserLabel(member.user));
             message += `\n${medals[i]} ${currentMedalNames.join(', ')}: ${orderedScoreGroups[i][0]} `;
         }
         await global.bot.sendMessage(chatId, message);
@@ -94,7 +94,7 @@ export namespace RoundUtils {
         if (!msg.reply_to_message || !msg.from || !msg.text) {
             throw "Invalid message";
         }
-        const res = await Controller.getMessageInteraction(msg.reply_to_message.message_id, msg.from.id);
+        const res = await Model.getMessageInteraction(msg.reply_to_message.message_id, msg.from.id);
         if (!res) {
             return;
         }
@@ -102,16 +102,16 @@ export namespace RoundUtils {
 
         // Get new word
         const word = msg.text;
-        await Controller.setWord(chatId, word);
-        await Controller.setGameStatus(chatId, Status.ANSWER);
+        await Model.setWord(chatId, word);
+        await Model.setGameStatus(chatId, Status.ANSWER);
 
         // Notify all users of new word
-        const players = await Controller.getPlayers(chatId);
+        const players = await Model.getPlayers(chatId);
 
         for (const userId of players) {
             const text = (userId == msg.from.id)
                 ? global.polyglot.t('round.leader.definition', { word })
-                : global.polyglot.t('round.player.definition', { word, leader: GenericUtils.getUserLabel(msg.from) });
+                : global.polyglot.t('round.player.definition', { word, leader: Utils.getUserLabel(msg.from) });
             const message = await global.bot.sendMessage(
                 userId,
                 text,
@@ -121,13 +121,13 @@ export namespace RoundUtils {
                     }
                 }
             );
-            await Controller.setMessageInteraction(message.message_id, userId, chatId, groupMessageId);
+            await Model.setMessageInteraction(message.message_id, userId, chatId, groupMessageId);
         }
 
         // Update round message on group chat
         await editGroupMessage(chatId, groupMessageId);
 
-        await Controller.unsetMessageInteraction(msg.reply_to_message.message_id, msg.from.id);
+        await Model.unsetMessageInteraction(msg.reply_to_message.message_id, msg.from.id);
     }
 
     // Receive the definitions from players and send poll when done
@@ -135,7 +135,7 @@ export namespace RoundUtils {
         if (!msg.reply_to_message || !msg.from || !msg.text) {
             throw "Invalid message";
         }
-        const res = await Controller.getMessageInteraction(msg.reply_to_message.message_id, msg.from.id);
+        const res = await Model.getMessageInteraction(msg.reply_to_message.message_id, msg.from.id);
         if (!res) {
             return;
         }
@@ -143,8 +143,8 @@ export namespace RoundUtils {
 
         // Get new definition
         const definition = msg.text;
-        await Controller.setDefinition(chatId, msg.from.id, definition);
-        await Controller.setGameStatus(chatId, Status.ANSWER);
+        await Model.setDefinition(chatId, msg.from.id, definition);
+        await Model.setGameStatus(chatId, Status.ANSWER);
 
         // Reply in private
         let replyMarkup: InlineKeyboardMarkup | undefined;
@@ -158,19 +158,19 @@ export namespace RoundUtils {
         }
         await global.bot.sendMessage(msg.chat.id, global.polyglot.t('round.end'), { reply_markup: replyMarkup });
 
-        if ((await Controller.numberOfDefinitions(chatId)) === (await Controller.numberOfPlayers(chatId))) {
-            await Controller.setGameStatus(chatId, Status.POLL);
+        if ((await Model.numberOfDefinitions(chatId)) === (await Model.numberOfPlayers(chatId))) {
+            await Model.setGameStatus(chatId, Status.POLL);
             await sendPoll(chatId);
 
-            const leader = (await global.bot.getChatMember(chatId, await Controller.getCurrentPlayer(chatId))).user;
+            const leader = (await global.bot.getChatMember(chatId, await Model.getCurrentPlayer(chatId))).user;
             await global.bot.editMessageText(
                 [
                     global.polyglot.t('round.group.round', {
-                        round: (await Controller.getRound(chatId) ?? 0) + 1,
-                        totalRounds: await Controller.numberOfPlayers(chatId),
+                        round: (await Model.getRound(chatId) ?? 0) + 1,
+                        totalRounds: await Model.numberOfPlayers(chatId),
                     }),
                     global.polyglot.t('round.group.end', {
-                        leader: GenericUtils.getUserLabel(leader),
+                        leader: Utils.getUserLabel(leader),
                     })
                 ].join('\n'),
                 { chat_id: chatId, message_id: groupMessageId }
@@ -180,7 +180,7 @@ export namespace RoundUtils {
             await editGroupMessage(chatId, groupMessageId);
         }
 
-        await Controller.unsetMessageInteraction(msg.message_id, msg.from.id);
+        await Model.unsetMessageInteraction(msg.message_id, msg.from.id);
     }
 
     const editGroupMessage = async (chatId: number, groupMessageId: number) => {
@@ -189,8 +189,8 @@ export namespace RoundUtils {
         await global.bot.editMessageText(
             [
                 global.polyglot.t('round.group.round', {
-                    round: (await Controller.getRound(chatId) ?? 0) + 1,
-                    totalRounds: await Controller.numberOfPlayers(chatId),
+                    round: (await Model.getRound(chatId) ?? 0) + 1,
+                    totalRounds: await Model.numberOfPlayers(chatId),
                 }),
                 global.polyglot.t('round.group.definition', {
                     missingPlayers: await getMissingPlayersString(chatId)
@@ -202,8 +202,8 @@ export namespace RoundUtils {
 
     // Send poll with definitions
     export const sendPoll = async (chatId: number) => {
-        await Controller.shuffleDefinitions(chatId);
-        const definitions = await Controller.getDefinitions(chatId);
+        await Model.shuffleDefinitions(chatId);
+        const definitions = await Model.getDefinitions(chatId);
 
         const MAX_BUTTONS_IN_ROW = 5;
 
@@ -230,8 +230,8 @@ export namespace RoundUtils {
             throw "Invalid query";
         }
         const [ players, leader ] = await Promise.all([
-            Controller.getPlayers(chatId),
-            Controller.getCurrentPlayer(chatId),
+            Model.getPlayers(chatId),
+            Model.getCurrentPlayer(chatId),
         ]);
         
         // ignore votes of non playing members and leader
@@ -246,9 +246,9 @@ export namespace RoundUtils {
             return global.bot.answerCallbackQuery(query.id, { text: global.polyglot.t('round.autoVote'), show_alert: true })
         }
         await global.bot.answerCallbackQuery(query.id, { text: global.polyglot.t('round.voteRegistered') })
-        await Controller.addVote(chatId, query.from.id, vote);
+        await Model.addVote(chatId, query.from.id, vote);
 
-        if ((await Controller.numberOfVotes(chatId)) >= (await Controller.numberOfPlayers(chatId)) - 1) {
+        if ((await Model.numberOfVotes(chatId)) >= (await Model.numberOfPlayers(chatId)) - 1) {
             // close poll
             await global.bot.editMessageText(
                 await getPollMessage(chatId, true),
@@ -256,16 +256,16 @@ export namespace RoundUtils {
             );            
 
             // update scores
-            const roundPoints = await Controller.getRoundPoints(chatId);
-            const oldScore = await Controller.getScores(chatId);
-            await Controller.updateScores(chatId, roundPoints);
-            const newScore = Object.fromEntries(Object.entries(await Controller.getScores(chatId)).sort((entry) => entry[1]).reverse());
+            const roundPoints = await Model.getRoundPoints(chatId);
+            const oldScore = await Model.getScores(chatId);
+            await Model.updateScores(chatId, roundPoints);
+            const newScore = Object.fromEntries(Object.entries(await Model.getScores(chatId)).sort((entry) => entry[1]).reverse());
 
             // send result
             let message = global.polyglot.t('round.scoreboard');
             for (const userId in newScore) {
                 const member = await global.bot.getChatMember(chatId, Number(userId));
-                const playerName = GenericUtils.getUserLabel(member.user);
+                const playerName = Utils.getUserLabel(member.user);
                 message += `\n${playerName} ${oldScore[Number(userId)]} + ${roundPoints[Number(userId)]} = ${newScore[Number(userId)]}`;
             }
             await global.bot.sendMessage(chatId, message);
@@ -284,9 +284,9 @@ export namespace RoundUtils {
 
     const getPollMessage = async (chatId: number, solution: boolean = false) => {
         const [ definitions, round, word ] = await Promise.all([
-            Controller.getDefinitions(chatId),
-            Controller.getRound(chatId),
-            Controller.getWord(chatId),
+            Model.getDefinitions(chatId),
+            Model.getRound(chatId),
+            Model.getWord(chatId),
         ]) 
 
         let text = global.polyglot.t('round.poll', { word });
@@ -301,7 +301,7 @@ export namespace RoundUtils {
             
             text += definitions[i].definition;
             if (solution) {
-                text += ` - **${ GenericUtils.getUserLabel((await global.bot.getChatMember(chatId, definitions[i].userId)).user) }**`;
+                text += ` - **${ Utils.getUserLabel((await global.bot.getChatMember(chatId, definitions[i].userId)).user) }**`;
             }
         }
 
@@ -315,9 +315,9 @@ export namespace RoundUtils {
     }
 
     const getMissingPlayersString = async (chatId: number) => {
-        const missingPlayersIds = await Controller.getMissingPlayers(chatId);
+        const missingPlayersIds = await Model.getMissingPlayers(chatId);
         const members = await Promise.all(missingPlayersIds.map(((userId) => global.bot.getChatMember(chatId, userId))));
-        const missingPlayers = members.map((member) => GenericUtils.getUserLabel(member.user));
+        const missingPlayers = members.map((member) => Utils.getUserLabel(member.user));
         return missingPlayers.join(', ');
     }
 

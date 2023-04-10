@@ -1,34 +1,34 @@
 import { CallbackQuery, Message, PollAnswer, Update } from "node-telegram-bot-api";
 
-import { CommandUtils } from "./utils/CommandUtils";
-import { PreparationUtils } from "./utils/PreparationUtils";
-import { RoundUtils } from "./utils/RoundUtils";
-import { Controller } from "./controller";
-import { Status } from "./models/Game";
-import * as I18n from "./i18n";
-import { LanguageUtils } from "./utils/LanguageUtils";
+import { CommandController } from "./CommandController";
+import { PreparationController } from "./PreparationController";
+import { RoundController } from "./RoundController";
+import { Model } from "../model/Model";
+import { Status } from "../model/Game";
+import * as I18n from "../i18n";
+import { LanguageController } from "./LanguageController";
 
 
 const handleCommand = async (msg: Message, language: string) => {
     try {
         switch (msg.text?.substring(1)) {
             case 'start':
-                await CommandUtils.startCommand(msg);
+                await CommandController.startCommand(msg);
                 break;
             case 'stop':
-                await CommandUtils.stopCommand(msg);
+                await CommandController.stopCommand(msg);
                 break;
             case 'help':
-                await CommandUtils.helpCommand(msg);
+                await CommandController.helpCommand(msg);
                 break;
             case 'language':
-                await LanguageUtils.languageCommand(msg);
+                await LanguageController.languageCommand(msg);
                 break;
             case 'about':
-                await CommandUtils.aboutCommand(msg);
+                await CommandController.aboutCommand(msg);
                 break;
             case 'donate':
-                await CommandUtils.donateCommand(msg);
+                await CommandController.donateCommand(msg);
                 break;
             default:
         }
@@ -36,7 +36,6 @@ const handleCommand = async (msg: Message, language: string) => {
     catch (err) {
         console.error(err);
     }
-
 };
 
 const handleCallbackQuery = async (query: CallbackQuery) => {
@@ -47,19 +46,19 @@ const handleCallbackQuery = async (query: CallbackQuery) => {
                 case 'prepare':
                     switch (suffix) {
                         case 'join':
-                            return PreparationUtils.join(query);
+                            return PreparationController.join(query);
                         case 'withdraw':
-                            return PreparationUtils.withdraw(query);
+                            return PreparationController.withdraw(query);
                         case 'continue':
-                            return RoundUtils.startGame(query);
+                            return RoundController.startGame(query);
                     }
                 case 'language':
-                    return LanguageUtils.languageCallback(query);
+                    return LanguageController.languageCallback(query);
                 case 'start':
-                    await LanguageUtils.languageCallback(query);
+                    await LanguageController.languageCallback(query);
                     return global.bot.sendMessage(query.message.chat.id, global.polyglot.t('start.welcome'), { parse_mode: 'Markdown' });
                 case 'poll':
-                    return RoundUtils.answer(query);
+                    return RoundController.answer(query);
                 default:
                     throw 'Unrecognized query data';
             }
@@ -88,18 +87,18 @@ const handleText = async (msg: Message) => {
             throw "Invalid message";
         }
     
-        const res = await Controller.getMessageInteraction(msg.reply_to_message.message_id,  msg.from.id);
+        const res = await Model.getMessageInteraction(msg.reply_to_message.message_id,  msg.from.id);
         if (!res) {
             global.bot.sendMessage(msg.from.id, global.polyglot.t('round.invalidInteraction'));
             return;
         }
     
-        const status = await Controller.getGameStatus(res.chatId);
+        const status = await Model.getGameStatus(res.chatId);
         if (status === Status.QUESTION) {
-            await RoundUtils.word(msg);
+            await RoundController.word(msg);
         }
         else if (status === Status.ANSWER) {
-            await RoundUtils.definition(msg);
+            await RoundController.definition(msg);
         }
     }
     catch (err) {
@@ -111,9 +110,9 @@ const handleText = async (msg: Message) => {
 const inferLanguageFromUpdate = async (update: Update) => {
     const chatId = update.message?.chat.type === 'group' ? update.message?.chat.id
         : update.callback_query ? update.callback_query.message?.chat.id
-        : update.message?.reply_to_message?.from && update.message.from ? (await Controller.getMessageInteraction(update.message.reply_to_message.message_id, update.message.from.id))?.chatId
+        : update.message?.reply_to_message?.from && update.message.from ? (await Model.getMessageInteraction(update.message.reply_to_message.message_id, update.message.from.id))?.chatId
         : update.message?.from?.id;
-    const language = await Controller.getLanguange(chatId);
+    const language = await Model.getLanguange(chatId);
     return language;
 }
 

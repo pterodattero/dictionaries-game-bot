@@ -1,29 +1,29 @@
 import { Message } from "node-telegram-bot-api";
 
-import { Controller } from "../controller";
-import { Status } from "../models/Game";
-import { Language, LanguageUtils } from "./LanguageUtils";
-import { PreparationUtils } from "./PreparationUtils";
+import { Model } from "../model/Model";
+import { Status } from "../model/Game";
+import { Language, LanguageController } from "./LanguageController";
+import { PreparationController } from "./PreparationController";
 
-export namespace CommandUtils {
+export namespace CommandController {
 
     export const startCommand = async (msg: Message) => {
         if (msg.chat.type !== "group") {
-            if (!(await Controller.isChatInitialized(msg.chat.id))) {
-                return LanguageUtils.languageCommand(msg, 'start');
+            if (!(await Model.isChatInitialized(msg.chat.id))) {
+                return LanguageController.languageCommand(msg, 'start');
             } else {
                 return global.bot.sendMessage(msg.chat.id, global.polyglot.t('start.error'));
             }
         }
         else {
-            await PreparationUtils.startPreparation(msg);
+            await PreparationController.startPreparation(msg);
         }
     }
 
     export const stopCommand = async (msg: Message) => {
         // If chat is not a group tell the player to add it to a group
-        if (await Controller.getGameStatus(msg.chat.id) !== Status.STOPPED) {
-            await Controller.setGameStatus(msg.chat.id, Status.STOPPED);
+        if (await Model.getGameStatus(msg.chat.id) !== Status.STOPPED) {
+            await Model.setGameStatus(msg.chat.id, Status.STOPPED);
             await global.bot.sendMessage(msg.chat.id, global.polyglot.t('command.stop'));
         }
         else {
@@ -33,11 +33,11 @@ export namespace CommandUtils {
 
     export const helpCommand = async (msg: Message) => {
         const helpText = global.polyglot.t('help', {
-            guessPoints: Controller.GUESS_POINTS,
-            everyoneGuessedPoints: Controller.EVERYONE_GUESSED_POINTS,
-            notEveryoneGuessedLeaderPoints: Controller.NOT_EVERYONE_GUESSED_LEADER_POINTS,
-            everyoneGuessedLeaderPoints: Controller.EVERYONE_GUESSED_LEADER_POINTS,
-            votePoints: Controller.VOTE_POINTS,
+            guessPoints: Model.GUESS_POINTS,
+            everyoneGuessedPoints: Model.EVERYONE_GUESSED_POINTS,
+            notEveryoneGuessedLeaderPoints: Model.NOT_EVERYONE_GUESSED_LEADER_POINTS,
+            everyoneGuessedLeaderPoints: Model.EVERYONE_GUESSED_LEADER_POINTS,
+            votePoints: Model.VOTE_POINTS,
         });
         await global.bot.sendMessage(msg.chat.id, helpText);
     }
