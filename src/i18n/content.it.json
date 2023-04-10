@@ -16,7 +16,8 @@
             "join": "Partecipa (%{availableSlots})",
             "withdraw": "Ritirati",
             "continue": "Inizia",
-            "register": "Autorizza PM"
+            "register": "Autorizza PM",
+            "testVersionError": "Stai usando una versione sperimentale del bot, lo sviluppatore deve partecipare al gioco."
         },
         "gameStarted": "Gioco iniziato!",
         "nonJoinedContinue": "Devi partecipare per avviare il gioco"

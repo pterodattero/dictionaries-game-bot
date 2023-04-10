@@ -50,6 +50,13 @@ const handleCallbackQuery = async (query: CallbackQuery) => {
                         case 'withdraw':
                             return PreparationController.withdraw(query);
                         case 'continue':
+                            // developer has to play in the game when not in production
+                            if ((!process.env.VERCEL_ENV || process.env.VERCEL_ENV !== 'production') && process.env.DEVELOPER_USER_ID) {
+                                const playerIds = await Model.getPlayers(query.message.chat.id);
+                                if (!playerIds.includes(Number(process.env.DEVELOPER_USER_ID))) {
+                                    return global.bot.answerCallbackQuery(query.id, { text: global.polyglot.t('prepare.keyboard.testVersionError'), show_alert: true });
+                                }
+                            }
                             return RoundController.startGame(query);
                     }
                 case 'language':
