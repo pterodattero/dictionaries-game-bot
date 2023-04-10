@@ -76,21 +76,14 @@ const handleText = async (msg: Message) => {
         if (msg.chat.type !== 'private') {
             return;
         }
-
-        // only replies are valid, otherwise it is not possible to uniquely reconduce text to group chats
-        if (!msg.reply_to_message) {
-            await global.bot.sendMessage(msg.chat.id, global.polyglot.t('replyAlert'), { reply_to_message_id: msg.message_id });
-            return;
-        }
     
         if (!msg.from) {
             throw "Invalid message";
         }
     
-        const res = await Model.getMessageInteraction(msg.reply_to_message.message_id,  msg.from.id);
+        const res = await Model.getMessageInteraction(msg.from.id, msg.reply_to_message?.message_id);
         if (!res) {
-            global.bot.sendMessage(msg.from.id, global.polyglot.t('round.invalidInteraction'));
-            return;
+            return global.bot.sendMessage(msg.from.id, global.polyglot.t('replyAlert'));
         }
     
         const status = await Model.getGameStatus(res.chatId);
@@ -102,15 +95,24 @@ const handleText = async (msg: Message) => {
         }
     }
     catch (err) {
-        console.error(err);
+        msg.from && await global.bot.sendMessage(msg.from.id, global.polyglot.t('invalidInteraction'));
     }
 }
 
 
 const inferLanguageFromUpdate = async (update: Update) => {
+    const safeGetMessageInteraction = async () => {
+        try {
+            if (update.message?.from) {
+                const interaction = await Model.getMessageInteraction(update.message?.from?.id, update.message.reply_to_message?.message_id);
+                return interaction?.chatId;
+            }
+        }
+        catch { }
+    }
     const chatId = update.message?.chat.type === 'group' ? update.message?.chat.id
         : update.callback_query ? update.callback_query.message?.chat.id
-        : update.message?.reply_to_message?.from && update.message.from ? (await Model.getMessageInteraction(update.message.reply_to_message.message_id, update.message.from.id))?.chatId
+        : update.message?.from ? await safeGetMessageInteraction()
         : update.message?.from?.id;
     const language = await Model.getLanguange(chatId);
     return language;

@@ -47,11 +47,11 @@
         "pollLeaderIntermission": "You're not playing in this round, so your vote won't be considered",
         "autoVote": "You can't vote for yourself",
         "voteRegistered": "Vote registered, wait for other players to vote",
-        "scoreboard": "Scoreboard:",
-        "invalidInteraction": "Sorry, this message is not active anymore."
+        "scoreboard": "Scoreboard:"
     },
+    "invalidInteraction": "What?",
     "end": "Game finished!",
-    "replyAlert": "If you want to interact with me please reply to my messages (swipe left)",
+    "replyAlert": "If you are playing in more that one game simultaneously you have to reply to my messages to avoid ambiguity (i.e. swipe left on my messages)",
     "help": "The leader of the game will select an odd, unusual word from the dictionary. The goal is to select a word that no one has ever heard of before, and that the meaning would be really hard to guess. While the leader writes the correct definition, each player writes down a fake but credible definition for it. Next, the bot sends a poll with the shuffled definitions without specifying the author. The players have to vote on which one they think is the real definition.\nPoints:\n - players get %{guessPoints} pt. for guessing the correct definition, but if everyone guesses she gets %{everyoneGuessedPoints}\n - if everyone guesses correctly, the leader gets %{everyoneGuessedLeaderPoints} pt. \n - otherwise she gets %{notEveryoneGuessedLeaderPoints} pt. \n - furthermore, players get %{votePoints} pt. for every received vote \nAfter everyone has had a turn as leader, the person who has scored the most points wins!",
     "language": {
         "select": "Select the language.",
@@ -61,6 +61,7 @@
     "about": "This project is open source. Check it out on [GitHub](https://github.com/pterodattero/dictionaries-game-bot).",
     "donate": "I don't feel ready yet for asking real money, but I appreciate your intent ❤️",
     "command": {
-        "stop": "Game stopped."
+        "stop": "Game stopped.",
+        "stopInGroup": "This command can be used only in group chats."
     }
 }
