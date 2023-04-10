@@ -33,10 +33,10 @@
         "startMessage": "Turno %{round}/%{totalRounds}\n%{leader} deve scegliere una parola!",
         "leader": {
             "word": "È il tuo turno per decidere una parola per la chat %{chat}! Rispondi a questo messaggio con la tua scelta.",
-            "definition": "Perfetto. Ora rispondi a questo messaggio con la definizione corretta di %{word}."
+            "definition": "Perfetto. Ora rispondi a questo messaggio con la definizione corretta di '%{word}'."
         },
         "player": {
-            "definition": "%{leader} ha scelto la parola %{word} per questo turno. Ora rispondi a questo messaggio con la tua definizione fittizia."
+            "definition": "%{leader} ha scelto la parola '%{word}' per questo turno. Ora rispondi a questo messaggio con la tua definizione fittizia."
         },
         "end": "Ottimo! Puoi tornare nella chat di gruppo e aspettare che gli altri giocatori finiscano di dare la loro definizione.",
         "checkGroup": "Vai a gruppo",
@@ -48,11 +48,11 @@
         "pollLeaderIntermission": "Non stai giocando in questo turno, il tuo voto non sarà considerato",
         "autoVote": "Non puoi autovotarti",
         "voteRegistered": "Voto registrato, aspetta che votino anche gli altri giocatori",
-        "scoreboard": "Punteggio:",
-        "invalidInteraction": "Mi dispiace, questo messaggio non è più attivo."
+        "scoreboard": "Punteggio:"
     },
+    "invalidInteraction": "Cosa?",
     "end": "Gioco finito!",
-    "replyAlert": "Se vuoi interagire con me per favore rispondi ai miei messaggi (scorri a sinistra).",
+    "replyAlert": "Se stai giocando in più di un gioco alla volta devi rispondere ai miei messaggi per evitare ambiguità (i.e. trascina a sinistra i miei messaggi)",
     "help": "Il narratore sceglie una parola strana, inusuale dal dizionario. L'obiettivo è scegliere una parola che nessuno ha mai sentito, e il cui significato è di difficile intuizione. Mentre il narratore inserisce la definizione corretta, ciascun giocatore inserisce una sua definizione fasulla ma credibile. Poi, il bot invia un sondaggio con le definizioni mischiate e anonime. I giocatori devono votare per quella che credono la definizione corretta.\nPunti:\n - i giocatori prendono %{guessPoints} pt. per aver indovinato la definizione corretta, ma se tutti indovinano prendono %{everyoneGuessedPoints}\n - se tutti indovinano, il narratore prende %{everyoneGuessedLeaderPoints} pt. \n - altrimenti prende %{notEveryoneGuessedLeaderPoints} pt. \n - inoltre, in giocatore prendono %{votePoints} pt. per ogni voto ricevuto \nDopo che tutti hanno giocato da narratore, chi ha più punti vince!",
     "resources": "Ecco qualche risorsa:",
     "language": {
@@ -63,6 +63,7 @@
     "about": "Questo progetto è open source. Dai un'occhiata su [GitHub](https://github.com/pterodattero/dictionaries-game-bot).",
     "donate": "Non mi sento pronto per ricevere soldi veri, ma apprezzo il pensiero ❤️",
     "command": {
-        "stop": "Gioco fermato."
+        "stop": "Gioco fermato.",
+        "stopInGroup": "Questo comando può essere usato solo in chat di gruppo."
     }
 }

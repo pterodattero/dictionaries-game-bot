@@ -21,10 +21,15 @@ export namespace CommandController {
     }
 
     export const stopCommand = async (msg: Message) => {
-        // If chat is not a group tell the player to add it to a group
-        if (await Model.getGameStatus(msg.chat.id) !== Status.STOPPED) {
-            await Model.setGameStatus(msg.chat.id, Status.STOPPED);
-            await global.bot.sendMessage(msg.chat.id, global.polyglot.t('command.stop'));
+        if (msg.chat.type !== 'group') {
+            await global.bot.sendMessage(msg.chat.id, global.polyglot.t('command.stopInGroup'));
+        }
+        else if (await Model.getGameStatus(msg.chat.id) !== Status.STOPPED) {
+            return Promise.all([
+                Model.setGameStatus(msg.chat.id, Status.STOPPED),
+                Model.cleanMessageInteractions(msg.chat.id),
+                global.bot.sendMessage(msg.chat.id, global.polyglot.t('command.stop')),
+            ]);
         }
         else {
             await global.bot.sendMessage(msg.chat.id, global.polyglot.t('start.noGame'));

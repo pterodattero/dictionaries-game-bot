@@ -42,22 +42,32 @@ export namespace Model {
     }
 
     // Interaction methods
-    export async function setMessageInteraction(messageId: number, userId: number, chatId: number, groupMessageId: number): Promise<void> {
-        await MessageInteraction.create({ messageId, userId, chatId, groupMessageId });
+    export async function setMessageInteraction(userId: number, messageId: number, chatId: number, groupMessageId: number): Promise<void> {
+        await MessageInteraction.create({ userId, messageId, chatId, groupMessageId });
     }
 
-    export async function unsetMessageInteraction(messageId: number, userId: number): Promise<void> {
-        if (await getMessageInteraction(messageId, userId))
-            await MessageInteraction.deleteOne({ messageId, userId })
+    export async function unsetMessageInteraction(userId: number, messageId?: number): Promise<void> {
+        if (await getMessageInteraction(userId, messageId))
+            await MessageInteraction.deleteOne(messageId ? { userId, messageId } : { userId });
     }
 
-    export async function getMessageInteraction(messageId: number, userId: number): Promise<{ chatId: number, groupMessageId: number } | undefined> {
-        const interaction = await MessageInteraction.findOne({ messageId, userId });
-        if (interaction)
-            return {
-                chatId: interaction.chatId,
-                groupMessageId: interaction.groupMessageId,
-            }
+    export async function cleanMessageInteractions(chatId: number) {
+        await MessageInteraction.deleteMany({ chatId });
+    }
+
+    export async function getMessageInteraction(userId: number, messageId?: number): Promise<{ chatId: number, groupMessageId: number } | undefined> {
+        if (!messageId && await MessageInteraction.countDocuments({ userId }) > 1) {
+            return;
+        }
+        const interaction = await MessageInteraction.findOne(messageId ? { userId, messageId } : { userId });
+        if (!interaction) {
+            throw "Interaction not found";
+        }
+
+        return {
+            chatId: interaction.chatId,
+            groupMessageId: interaction.groupMessageId,
+        }
     }
 
 
@@ -185,11 +195,11 @@ export namespace Model {
         await game.save();
     }
 
-    export async function getDefinitions(chatId: number): Promise<{userId: number, definition: string}[]> {
+    export async function getDefinitions(chatId: number): Promise<{ userId: number, definition: string }[]> {
         const game = await getGame(chatId);
         if (!game.indexes)
             throw Error('Indexes not initialized');
-        return game.indexes.map((index) => ({ userId: game.players[index].userId, definition: game.players[index].definition ?? ''}));
+        return game.indexes.map((index) => ({ userId: game.players[index].userId, definition: game.players[index].definition ?? '' }));
     }
 
     export async function numberOfDefinitions(chatId: number): Promise<number> {
@@ -216,7 +226,7 @@ export namespace Model {
 
         const leaderId = await getCurrentPlayer(chatId);
         return game.players
-            .filter((playerData) => game.status === Status.ANSWER ? !playerData.definition : (!playerData.vote) && playerData.userId !== leaderId )
+            .filter((playerData) => game.status === Status.ANSWER ? !playerData.definition : (!playerData.vote) && playerData.userId !== leaderId)
             .map((playerData) => playerData.userId);
     }
 

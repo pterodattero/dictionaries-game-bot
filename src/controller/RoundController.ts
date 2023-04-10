@@ -27,7 +27,10 @@ export namespace RoundController {
     export const newRound = async (chatId: number) => {
         if (!(await Model.newRound(chatId))) {
             // Give prizes
-            await finalScoreboard(chatId);
+            return Promise.all([
+                finalScoreboard(chatId),
+                Model.cleanMessageInteractions(chatId),
+            ])
         }
         else {
             await Model.setGameStatus(chatId, Status.QUESTION);
@@ -61,7 +64,7 @@ export namespace RoundController {
                     }
                 }
             );
-            await Model.setMessageInteraction(message.message_id, leader.id, chatId, groupMessage.message_id);
+            await Model.setMessageInteraction(leader.id, message.message_id, chatId, groupMessage.message_id);
         }
     }
 
@@ -91,10 +94,12 @@ export namespace RoundController {
 
     // Receive the round word from leader and notify players
     export const word = async (msg: Message) => {
-        if (!msg.reply_to_message || !msg.from || !msg.text) {
+        if (!msg.from || !msg.text) {
             throw "Invalid message";
         }
-        const res = await Model.getMessageInteraction(msg.reply_to_message.message_id, msg.from.id);
+        const res = await Model.getMessageInteraction(msg.from.id, msg.reply_to_message?.message_id);
+        await Model.unsetMessageInteraction(msg.from.id, msg.reply_to_message?.message_id);
+
         if (!res) {
             return;
         }
@@ -121,21 +126,19 @@ export namespace RoundController {
                     }
                 }
             );
-            await Model.setMessageInteraction(message.message_id, userId, chatId, groupMessageId);
+            await Model.setMessageInteraction(userId, message.message_id, chatId, groupMessageId);
         }
 
         // Update round message on group chat
         await editGroupMessage(chatId, groupMessageId);
-
-        await Model.unsetMessageInteraction(msg.reply_to_message.message_id, msg.from.id);
     }
 
     // Receive the definitions from players and send poll when done
     export const definition = async (msg: Message) => {
-        if (!msg.reply_to_message || !msg.from || !msg.text) {
+        if (!msg.from || !msg.text) {
             throw "Invalid message";
         }
-        const res = await Model.getMessageInteraction(msg.reply_to_message.message_id, msg.from.id);
+        const res = await Model.getMessageInteraction(msg.from.id, msg.reply_to_message?.message_id);
         if (!res) {
             return;
         }
@@ -180,7 +183,7 @@ export namespace RoundController {
             await editGroupMessage(chatId, groupMessageId);
         }
 
-        await Model.unsetMessageInteraction(msg.message_id, msg.from.id);
+        await Model.unsetMessageInteraction(msg.from.id, msg.reply_to_message?.message_id);
     }
 
     const editGroupMessage = async (chatId: number, groupMessageId: number) => {
