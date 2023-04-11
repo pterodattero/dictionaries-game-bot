@@ -286,20 +286,19 @@ export namespace RoundController {
     }
 
     const getPollMessage = async (chatId: number, solution: boolean = false) => {
-        const [ definitions, round, word ] = await Promise.all([
+        const [ definitions, word, leaderId ] = await Promise.all([
             Model.getDefinitions(chatId),
-            Model.getRound(chatId),
             Model.getWord(chatId),
+            Model.getCurrentPlayer(chatId),
         ]) 
 
         let text = global.polyglot.t('round.poll', { word });
-        for (let i = 0; i < definitions.length; i++) {
-            const isLeader = i === round;
+        for (const i in definitions) {
             text += '\n';
             if (solution) {
-                text += isLeader ? '✔️ ' : '❌ ';
+                text += definitions[i].userId === leaderId ? '✔️ ' : '❌ ';
             } else {
-                text += `${i + 1}. `;
+                text += `${Number(i) + 1}. `;
             }
             
             text += definitions[i].definition;
