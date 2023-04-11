@@ -226,7 +226,7 @@ export namespace Model {
 
         const leaderId = await getCurrentPlayer(chatId);
         return game.players
-            .filter((playerData) => game.status === Status.ANSWER ? !playerData.definition : (!playerData.vote) && playerData.userId !== leaderId)
+            .filter((playerData) => (game.status === Status.ANSWER) ? !playerData.definition : (!playerData.vote && playerData.userId !== leaderId))
             .map((playerData) => playerData.userId);
     }
 
