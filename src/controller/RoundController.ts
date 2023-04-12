@@ -206,23 +206,12 @@ export namespace RoundController {
     // Send poll with definitions
     export const sendPoll = async (chatId: number) => {
         await Model.shuffleDefinitions(chatId);
-        const definitions = await Model.getDefinitions(chatId);
-
-        const MAX_BUTTONS_IN_ROW = 5;
-
-        const keyboard: InlineKeyboardButton[][] = [];
-        for (let i = 0; i < definitions.length; i++) {
-            if (i % MAX_BUTTONS_IN_ROW === 0) {
-                keyboard.push([]);
-            }
-            keyboard[keyboard.length - 1].push({ text: String(i + 1), callback_data: `poll:${definitions[i].userId}` })
-        }
-
-        global.bot.sendMessage(
-            chatId,
+        const [ text, keyboard ] = await Promise.all([
             await getPollMessage(chatId),
-            { reply_markup: { inline_keyboard: keyboard }, parse_mode: 'Markdown' }
-        )
+            await getPollKeyboard(chatId),
+        ])
+
+        global.bot.sendMessage(chatId, text, { reply_markup: { inline_keyboard: keyboard }, parse_mode: 'Markdown' });
     }
 
 
@@ -275,6 +264,14 @@ export namespace RoundController {
 
             // start new round
             await newRound(chatId);
+        } else {
+            // only update message
+            const [ text, keyboard ] = await Promise.all([
+                await getPollMessage(chatId),
+                await getPollKeyboard(chatId),
+            ])
+    
+            global.bot.editMessageText(text, { chat_id: chatId, message_id: query.message?.message_id, reply_markup: { inline_keyboard: keyboard }, parse_mode: 'Markdown' });
         }
     }
 
@@ -314,6 +311,22 @@ export namespace RoundController {
         }
 
         return text;
+    }
+
+    const getPollKeyboard = async (chatId: number) => {
+        const definitions = await Model.getDefinitions(chatId);
+
+        const MAX_BUTTONS_IN_ROW = 5;
+
+        const keyboard: InlineKeyboardButton[][] = [];
+        for (let i = 0; i < definitions.length; i++) {
+            if (i % MAX_BUTTONS_IN_ROW === 0) {
+                keyboard.push([]);
+            }
+            keyboard[keyboard.length - 1].push({ text: String(i + 1), callback_data: `poll:${definitions[i].userId}` })
+        }
+
+        return keyboard;
     }
 
     const getMissingPlayersString = async (chatId: number) => {
