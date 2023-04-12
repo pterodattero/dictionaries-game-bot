@@ -5,7 +5,7 @@ import Path from 'path';
 import { Model } from "../model/Model"
 import { Status } from "../model/Game";
 import { Utils } from "./Utils";
-
+import Constants from "../constants";
 
 export namespace RoundController {
 
@@ -310,11 +310,9 @@ export namespace RoundController {
     const getPollKeyboard = async (chatId: number) => {
         const definitions = await Model.getDefinitions(chatId);
 
-        const MAX_BUTTONS_IN_ROW = 5;
-
         const keyboard: InlineKeyboardButton[][] = [];
         for (let i = 0; i < definitions.length; i++) {
-            if (i % MAX_BUTTONS_IN_ROW === 0) {
+            if (i % Constants.MAX_BUTTONS_IN_ROW === 0) {
                 keyboard.push([]);
             }
             keyboard[keyboard.length - 1].push({ text: String(i + 1), callback_data: `poll:${definitions[i].userId}` })
