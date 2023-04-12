@@ -64,7 +64,7 @@ export namespace PreparationController {
         if (await Model.removePlayer(query.message.chat.id, query.from?.id)) {
             const messageKey = { chat_id: query.message.chat.id, message_id: query.message.message_id }
             const replyMarkup = await getJoinKeyboard(query.message);
-            await global.bot.editMessageText(await getJoinMessage(query.message), { reply_markup: replyMarkup, ...messageKey, });
+            await global.bot.editMessageText(await getJoinMessage(query.message), { reply_markup: replyMarkup, ...messageKey, parse_mode: 'Markdown'});
         }
         else {
             await global.bot.answerCallbackQuery(query.id, { text: global.polyglot.t('prepare.notJoined') });

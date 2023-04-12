@@ -48,7 +48,7 @@ export namespace RoundController {
                         leader: Utils.getUserLabel(leader),
                     })
                 ].join('\n'),
-                { reply_markup: await getCheckBotChatReplyMarkup() }
+                { reply_markup: await getCheckBotChatReplyMarkup(), parse_mode: 'Markdown' }
             );
 
             // Contact privately the leader
@@ -89,7 +89,7 @@ export namespace RoundController {
                 .map(member => Utils.getUserLabel(member.user));
             message += `\n${medals[i]} ${currentMedalNames.join(', ')}: ${orderedScoreGroups[i][0]} `;
         }
-        await global.bot.sendMessage(chatId, message);
+        await global.bot.sendMessage(chatId, message, { parse_mode: 'Markdown' });
     }
 
     // Receive the round word from leader and notify players
@@ -120,11 +120,7 @@ export namespace RoundController {
             const message = await global.bot.sendMessage(
                 userId,
                 text,
-                {
-                    reply_markup: {
-                        force_reply: true,
-                    }
-                }
+                { reply_markup: { force_reply: true }, parse_mode: 'Markdown' }
             );
             await Model.setMessageInteraction(userId, message.message_id, chatId, groupMessageId);
         }
@@ -176,7 +172,7 @@ export namespace RoundController {
                         leader: Utils.getUserLabel(leader),
                     })
                 ].join('\n'),
-                { chat_id: chatId, message_id: groupMessageId }
+                { chat_id: chatId, message_id: groupMessageId, parse_mode: 'Markdown' }
             );
         }
         else {
@@ -260,7 +256,7 @@ export namespace RoundController {
                 const playerName = Utils.getUserLabel(member.user);
                 message += `\n${playerName} ${oldScore[Number(userId)]} + ${roundPoints[Number(userId)]} = ${newScore[Number(userId)]}`;
             }
-            await global.bot.sendMessage(chatId, message);
+            await global.bot.sendMessage(chatId, message, { parse_mode: 'Markdown' });
 
             // start new round
             await newRound(chatId);
@@ -291,11 +287,9 @@ export namespace RoundController {
 
         let text = global.polyglot.t('round.poll', { word });
         for (const i in definitions) {
-            text += '\n';
+            text += `\n${Number(i) + 1}. `;
             if (solution) {
                 text += definitions[i].userId === leaderId ? '✔️ ' : '❌ ';
-            } else {
-                text += `${Number(i) + 1}. `;
             }
             
             text += definitions[i].definition;
@@ -305,7 +299,7 @@ export namespace RoundController {
         }
 
         if (!solution) {
-            text += `\n\n ${global.polyglot.t('round.group.voteMissing', {
+            text += `\n\n${global.polyglot.t('round.group.voteMissing', {
                 missingPlayers: await getMissingPlayersString(chatId)
             })}`;
         }
