@@ -1,20 +1,12 @@
 import mongoose from "mongoose";
+
+import Constants from "../constants";
 import Game, { IGame, Status } from "./Game";
 import MessageInteraction from "./MessageInteraction";
 import Settings from "./Settings";
 
 
-
 export namespace Model {
-    // constants
-    export const MIN_PLAYERS = 4;
-    export const MAX_PLAYERS = 10;
-
-    export const VOTE_POINTS = 1;
-    export const GUESS_POINTS = 3;
-    export const EVERYONE_GUESSED_POINTS = 2;
-    export const NOT_EVERYONE_GUESSED_LEADER_POINTS = 3;
-    export const EVERYONE_GUESSED_LEADER_POINTS = 0;
 
     // general DB methods
     export async function connect() {
@@ -258,16 +250,16 @@ export namespace Model {
         // Guess points
         for (const player of game.players) {
             if (player.userId === leaderId) {
-                roundPoints[player.userId] += everyoneGuessed ? EVERYONE_GUESSED_LEADER_POINTS : NOT_EVERYONE_GUESSED_LEADER_POINTS;
+                roundPoints[player.userId] += everyoneGuessed ? Constants.EVERYONE_GUESSED_LEADER_POINTS : Constants.NOT_EVERYONE_GUESSED_LEADER_POINTS;
             } else if (player.vote === leaderId) {
-                roundPoints[player.userId] += everyoneGuessed ? EVERYONE_GUESSED_POINTS : GUESS_POINTS;
+                roundPoints[player.userId] += everyoneGuessed ? Constants.EVERYONE_GUESSED_POINTS : Constants.GUESS_POINTS;
             }
         }
 
         // Vote points
         for (const player of game.players) {
             if (player.vote && player.vote !== player.userId && player.vote !== leaderId) {
-                roundPoints[player.vote] += VOTE_POINTS;
+                roundPoints[player.vote] += Constants.VOTE_POINTS;
             }
         }
 

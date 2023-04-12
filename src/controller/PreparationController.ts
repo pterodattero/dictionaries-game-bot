@@ -4,6 +4,7 @@ import { Model } from "../model/Model"
 import { Status } from "../model/Game"
 import { RoundController } from "./RoundController";
 import { Utils } from "./Utils";
+import Constants from "../constants";
 
 export namespace PreparationController {
 
@@ -46,7 +47,7 @@ export namespace PreparationController {
             await global.bot.editMessageText(await getJoinMessage(query.message), { reply_markup: replyMarkup, ...messageKey, });
 
             // When maximum nuber of players is reached start first round
-            if ((await Model.numberOfPlayers(query.message.chat.id)) >= Model.MAX_PLAYERS) {
+            if ((await Model.numberOfPlayers(query.message.chat.id)) >= Constants.MAX_PLAYERS) {
                 await RoundController.startGame(query);
             }
         }
@@ -79,13 +80,13 @@ export namespace PreparationController {
         const keyboard: TelegramBot.InlineKeyboardMarkup = {
             inline_keyboard: [
                 [
-                    { text: global.polyglot.t('prepare.keyboard.join', { availableSlots: Model.MAX_PLAYERS - numberOfPlayers }), callback_data: 'prepare:join' },
+                    { text: global.polyglot.t('prepare.keyboard.join', { availableSlots: Constants.MAX_PLAYERS - numberOfPlayers }), callback_data: 'prepare:join' },
                     { text: global.polyglot.t('prepare.keyboard.withdraw'), callback_data: 'prepare:withdraw' }
                 ]
             ]
         };
 
-        if ((numberOfPlayers >= Model.MIN_PLAYERS) || (process.env.NODE_ENV === 'development')) {
+        if ((numberOfPlayers >= Constants.MIN_PLAYERS) || (process.env.NODE_ENV === 'development')) {
             keyboard.inline_keyboard[0].push({ text: global.polyglot.t('prepare.keyboard.continue'), callback_data: 'prepare:continue' })
         }
 
@@ -99,7 +100,7 @@ export namespace PreparationController {
 
     // Auxiliary method to get preparation message
     const getJoinMessage = async (msg: Message) => {
-        let message = global.polyglot.t('prepare.start', { minPlayers: Model.MIN_PLAYERS, maxPlayers: Model.MAX_PLAYERS });
+        let message = global.polyglot.t('prepare.start', { minPlayers: Constants.MIN_PLAYERS, maxPlayers: Constants.MAX_PLAYERS });
         const playerIds = await Model.getPlayers(msg.chat.id);
         const members = await Promise.all(playerIds.map(((userId) => global.bot.getChatMember(msg.chat.id, userId))));
         const playerNames = members.map(((member) => Utils.getUserLabel(member.user)));

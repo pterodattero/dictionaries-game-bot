@@ -4,6 +4,7 @@ import { Model } from "../model/Model";
 import { Status } from "../model/Game";
 import { Language, LanguageController } from "./LanguageController";
 import { PreparationController } from "./PreparationController";
+import Constants from "../constants";
 
 export namespace CommandController {
 
@@ -38,11 +39,11 @@ export namespace CommandController {
 
     export const helpCommand = async (msg: Message) => {
         const helpText = global.polyglot.t('help', {
-            guessPoints: Model.GUESS_POINTS,
-            everyoneGuessedPoints: Model.EVERYONE_GUESSED_POINTS,
-            notEveryoneGuessedLeaderPoints: Model.NOT_EVERYONE_GUESSED_LEADER_POINTS,
-            everyoneGuessedLeaderPoints: Model.EVERYONE_GUESSED_LEADER_POINTS,
-            votePoints: Model.VOTE_POINTS,
+            guessPoints: Constants.GUESS_POINTS,
+            everyoneGuessedPoints: Constants.EVERYONE_GUESSED_POINTS,
+            notEveryoneGuessedLeaderPoints: Constants.NOT_EVERYONE_GUESSED_LEADER_POINTS,
+            everyoneGuessedLeaderPoints: Constants.EVERYONE_GUESSED_LEADER_POINTS,
+            votePoints: Constants.VOTE_POINTS,
         });
         await global.bot.sendMessage(msg.chat.id, helpText);
     }
