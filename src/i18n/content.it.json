@@ -17,7 +17,8 @@
             "withdraw": "Ritirati",
             "continue": "Inizia",
             "register": "Autorizza PM",
-            "testVersionError": "Stai usando una versione sperimentale del bot, lo sviluppatore deve partecipare al gioco."
+            "testVersionError": "Stai usando una versione sperimentale del bot, lo sviluppatore deve partecipare al gioco.",
+            "inactive": "Questo messaggio non è più valido"
         },
         "gameStarted": "Gioco iniziato!",
         "nonJoinedContinue": "Devi partecipare per avviare il gioco"
@@ -44,12 +45,18 @@
         "maxLength": "max %{maxLength} caratteri",
         "tooLongWordError": "Una parola può essere al massimo lunga %{maxLength} caratteri.",
         "tooLongDefinitionError": "Una definizione può essere al massimo lunga %{maxLength} caratteri.",
-        "poll": "*Qual'è la definizione corretta di '%{word}'*?",
-        "pollIntermission": "Non stai giocando in questo gioco, il tuo voto non sarà considerato",
-        "pollLeaderIntermission": "Non stai giocando in questo turno, il tuo voto non sarà considerato",
-        "autoVote": "Non puoi autovotarti",
-        "voteRegistered": "Voto registrato, aspetta che votino anche gli altri giocatori",
-        "scoreboard": "Punteggio:"
+        "scoreboard": "Punteggio:",
+        "poll": {
+            "header": "*Qual'è la definizione corretta di '%{word}'*?",
+            "intermission": "Non stai giocando in questo gioco, il tuo voto non sarà considerato",
+            "leaderIntermission": "Non stai giocando in questo turno, il tuo voto non sarà considerato",
+            "autoVote": "Non puoi autovotarti",
+            "voteRegistered": "Voto registrato, aspetta che votino anche gli altri giocatori",
+            "invalidButton": "Bottone non valido",
+            "notFound": "Sto avendo qualche problema a recuperare i dati...",
+            "votedBy": "Votata da: %{players}",
+            "noVotes": "Nessuno ha votato questa definizione"
+        }
     },
     "invalidInteraction": "Cosa?",
     "end": "Gioco finito!",

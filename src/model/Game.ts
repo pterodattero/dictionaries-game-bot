@@ -23,6 +23,8 @@ export interface IGame {
     round?: number,
     word?: string,
     indexes: number[], // index map: pollPosition -> playerIndex
+    startMessageId?: number,
+    pollMessageId?: number,
 }
 
 const PlayerSchema = new Schema<IPlayer>({
@@ -39,6 +41,8 @@ const GameSchema = new Schema<IGame>({
     round: Number,
     word: String,
     indexes: [Number],
+    startMessageId: Number,
+    pollMessageId: Number,
 })
 
 export default model('Game', GameSchema);

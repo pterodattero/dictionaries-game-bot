@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import Constants from "../constants";
 import Game, { IGame, Status } from "./Game";
 import MessageInteraction from "./MessageInteraction";
+import Rounds from "./Rounds";
 import Settings from "./Settings";
 
 
@@ -76,19 +77,20 @@ export namespace Model {
         return game;
     }
 
-    export async function getGameStatus(chatId: number): Promise<Status> {
-        let game;
+    export async function getGameStatus(chatId: number) {
         try {
-            game = await getGame(chatId);
+            const game = await getGame(chatId);
+            return game.status;
         }
-        catch (err) {
+        catch {
             return Status.STOPPED;
         }
-        return game?.status;
     }
 
-    export async function setGameStatus(chatId: number, status: Status): Promise<void> {
-        await Game.findOneAndUpdate({ chatId }, { status });
+    export async function setGameStatus(chatId: number, status: Status) {
+        const game = await getGame(chatId);
+        game.status = status;
+        await game.save();
     }
 
     // Player methods
@@ -142,8 +144,9 @@ export namespace Model {
         return game.round;
     }
 
-    export async function newRound(chatId: number): Promise<boolean> {
+    export async function initRound(chatId: number): Promise<boolean> {
         const game = await getGame(chatId);
+        game.pollMessageId = undefined;
 
         for (const player of game.players) {
             player.definition = undefined;
@@ -280,5 +283,55 @@ export namespace Model {
             game.players[i].score += roundPoints[game.players[i].userId];
         }
         await game.save();
+    }
+
+
+    // message ID methods
+    export async function setStartMessageId(chatId: number, messageId?: number) {
+        const game = await getGame(chatId);
+        game.startMessageId = messageId;
+        await game.save();
+    }    
+
+    export async function getStartMessageId(chatId: number) {
+        const game = await getGame(chatId);
+        return game.startMessageId;
+    }    
+
+    export async function setPollMessageId(chatId: number, messageId: number) {
+        const game = await getGame(chatId);
+        game.pollMessageId = messageId;
+        await game.save();
+    }    
+
+    export async function getPollMessageId(chatId: number) {
+        const game = await getGame(chatId);
+        return game.pollMessageId;
+    }    
+
+
+    // archive methods
+    export async function archiveCurrentRound(chatId: number) {
+        const game = await getGame(chatId);
+        const userVotes: { [userId: number]: number[]} = {};
+        for (const playerData of game.players) {
+            if (playerData.vote) {
+                userVotes[playerData.vote] ??= [];
+                userVotes[playerData.vote].push(playerData.userId);
+            }
+        }
+        await Rounds.create({
+            chatId,
+            pollMessageId: game.pollMessageId,
+            votes: Object.entries(userVotes).map(([ userId, votes ]) => ({ userId, votes })),
+        });
+    }
+
+    export async function getRoundVotes(chatId: number, pollMessageId: number) {
+        const round = await Rounds.findOne({ chatId, pollMessageId });
+        if (!round) {
+            throw 'Round not found';
+        }
+        return round.votes;
     }
 }
