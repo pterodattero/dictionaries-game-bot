@@ -43,12 +43,18 @@
         "maxLength":  "max %{maxLength} characters",
         "tooLongWordError": "A word can be at most %{maxLength} long.",
         "tooLongDefinitionError": "A definition can be at most %{maxLength} long.",
-        "poll": "*Which is the correct definition of '%{word}'?*",
-        "pollIntermission": "You're not playing in this game, so your vote won't be considered",
-        "pollLeaderIntermission": "You're not playing in this round, so your vote won't be considered",
-        "autoVote": "You can't vote for yourself",
-        "voteRegistered": "Vote registered, wait for other players to vote",
-        "scoreboard": "Scoreboard:"
+        "scoreboard": "Scoreboard:",
+        "poll": {
+            "header": "*Which is the correct definition of '%{word}'?*",
+            "intermission": "You're not playing in this game, so your vote won't be considered",
+            "leaderIntermission": "You're not playing in this round, so your vote won't be considered",
+            "autoVote": "You can't vote for yourself",
+            "voteRegistered": "Vote registered, wait for other players to vote",
+            "invalidButton": "Invalid button",
+            "notFound": "I'm having some troubles in fetching data...",
+            "votedBy": "Voted by: %{players}",
+            "noVotes": "No one voted for this definition"
+        }
     },
     "invalidInteraction": "What?",
     "end": "Game finished!",

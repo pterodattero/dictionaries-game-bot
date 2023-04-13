@@ -25,7 +25,7 @@ export namespace RoundController {
 
     // Start a new round
     export const newRound = async (chatId: number) => {
-        if (!(await Model.newRound(chatId))) {
+        if (!(await Model.initRound(chatId))) {
             // Give prizes
             return Promise.all([
                 finalScoreboard(chatId),
@@ -192,10 +192,10 @@ export namespace RoundController {
                     totalRounds: await Model.numberOfPlayers(chatId),
                 }),
                 global.polyglot.t('round.group.definition', {
-                    missingPlayers: await getMissingPlayersString(chatId)
+                    missingPlayers: await getPlayersString(chatId, await Model.getMissingPlayers(chatId))
                 })
             ].join('\n'),
-            { reply_markup: await getCheckBotChatReplyMarkup(), chat_id: chatId, message_id: groupMessageId }
+            { reply_markup: await getCheckBotChatReplyMarkup(), chat_id: chatId, message_id: groupMessageId, parse_mode: 'Markdown' }
         );
     }
 
@@ -207,7 +207,8 @@ export namespace RoundController {
             await getPollKeyboard(chatId),
         ])
 
-        global.bot.sendMessage(chatId, text, { reply_markup: { inline_keyboard: keyboard }, parse_mode: 'Markdown' });
+        const message = await global.bot.sendMessage(chatId, text, { reply_markup: { inline_keyboard: keyboard }, parse_mode: 'Markdown' });
+        await Model.setPollMessageId(chatId, message.message_id);
     }
 
 
@@ -224,23 +225,27 @@ export namespace RoundController {
         
         // ignore votes of non playing members and leader
         if (!players.includes(query.from.id)) {
-            return global.bot.answerCallbackQuery(query.id, { text: global.polyglot.t('round.pollIntermission'), show_alert: true })
+            return global.bot.answerCallbackQuery(query.id, { text: global.polyglot.t('round.poll.intermission'), show_alert: true })
         }
         if (query.from.id === leader) {
-            return global.bot.answerCallbackQuery(query.id, { text: global.polyglot.t('round.pollLeaderIntermission'), show_alert: true })
+            return global.bot.answerCallbackQuery(query.id, { text: global.polyglot.t('round.poll.leaderIntermission'), show_alert: true })
         }
         const vote = Number(query.data.split(':')[1]);
         if (query.from.id === vote) {
-            return global.bot.answerCallbackQuery(query.id, { text: global.polyglot.t('round.autoVote'), show_alert: true })
+            return global.bot.answerCallbackQuery(query.id, { text: global.polyglot.t('round.poll.autoVote'), show_alert: true })
         }
-        await global.bot.answerCallbackQuery(query.id, { text: global.polyglot.t('round.voteRegistered') })
+        await global.bot.answerCallbackQuery(query.id, { text: global.polyglot.t('round.poll.voteRegistered') })
         await Model.addVote(chatId, query.from.id, vote);
 
         if ((await Model.numberOfVotes(chatId)) >= (await Model.numberOfPlayers(chatId)) - 1) {
             // close poll
-            await global.bot.editMessageText(
+            const [ text, keyboard ] = await Promise.all([
                 await getPollMessage(chatId, true),
-                { chat_id: chatId, message_id: query.message?.message_id, parse_mode: 'Markdown' },
+                await getPollKeyboard(chatId),
+            ])
+            await global.bot.editMessageText(
+                text,
+                { reply_markup: { inline_keyboard: keyboard }, chat_id: chatId, message_id: query.message?.message_id, parse_mode: 'Markdown' },
             );            
 
             // update scores
@@ -259,6 +264,7 @@ export namespace RoundController {
             await global.bot.sendMessage(chatId, message, { parse_mode: 'Markdown' });
 
             // start new round
+            await Model.archiveCurrentRound(chatId);
             await newRound(chatId);
         } else {
             // only update message
@@ -267,7 +273,27 @@ export namespace RoundController {
                 await getPollKeyboard(chatId),
             ])
     
-            global.bot.editMessageText(text, { chat_id: chatId, message_id: query.message?.message_id, reply_markup: { inline_keyboard: keyboard }, parse_mode: 'Markdown' });
+            await global.bot.editMessageText(text, { chat_id: chatId, message_id: query.message?.message_id, reply_markup: { inline_keyboard: keyboard }, parse_mode: 'Markdown' });
+        }
+    }
+
+
+    export const seeVotes = async (query: CallbackQuery) => {
+        try {
+            if (!query.message || !query.data) {
+                return global.bot.answerCallbackQuery(query.id, { text: global.polyglot.t('round.poll.invalidButton') });
+            };
+            const chatId = query.message.chat.id;
+            const votes = await Model.getRoundVotes(chatId, query.message.message_id);
+            const userId = Number(query.data.split(':')[1]);
+            const userVotes = votes.find((el) => el.userId === userId);
+            const text = userVotes
+                ? global.polyglot.t('round.poll.votedBy', { players: await getPlayersString(chatId, userVotes.votes, false) })
+                : global.polyglot.t('round.poll.noVotes');
+            return global.bot.answerCallbackQuery(query.id, { text, show_alert: true });
+        }
+        catch {
+            return global.bot.answerCallbackQuery(query.id, { text: global.polyglot.t('round.poll.notFound') });
         }
     }
 
@@ -285,7 +311,7 @@ export namespace RoundController {
             Model.getCurrentPlayer(chatId),
         ]) 
 
-        let text = global.polyglot.t('round.poll', { word });
+        let text = global.polyglot.t('round.poll.header', { word });
         for (const i in definitions) {
             text += `\n${Number(i) + 1}. `;
             if (solution) {
@@ -300,7 +326,7 @@ export namespace RoundController {
 
         if (!solution) {
             text += `\n\n${global.polyglot.t('round.group.voteMissing', {
-                missingPlayers: await getMissingPlayersString(chatId)
+                missingPlayers: await getPlayersString(chatId, await Model.getMissingPlayers(chatId))
             })}`;
         }
 
@@ -321,10 +347,9 @@ export namespace RoundController {
         return keyboard;
     }
 
-    const getMissingPlayersString = async (chatId: number) => {
-        const missingPlayersIds = await Model.getMissingPlayers(chatId);
-        const members = await Promise.all(missingPlayersIds.map(((userId) => global.bot.getChatMember(chatId, userId))));
-        const missingPlayers = members.map((member) => Utils.getUserLabel(member.user));
+    const getPlayersString = async (chatId: number, userIds: number[], mentions: boolean = true) => {
+        const members = await Promise.all(userIds.map(((userId) => global.bot.getChatMember(chatId, userId))));
+        const missingPlayers = members.map((member) => Utils.getUserLabel(member.user, mentions));
         return missingPlayers.join(', ');
     }
 
