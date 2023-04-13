@@ -17,7 +17,8 @@
             "withdraw": "Ritirati",
             "continue": "Inizia",
             "register": "Autorizza PM",
-            "testVersionError": "Stai usando una versione sperimentale del bot, lo sviluppatore deve partecipare al gioco."
+            "testVersionError": "Stai usando una versione sperimentale del bot, lo sviluppatore deve partecipare al gioco.",
+            "inactive": "Questo messaggio non è più valido"
         },
         "gameStarted": "Gioco iniziato!",
         "nonJoinedContinue": "Devi partecipare per avviare il gioco"

@@ -22,18 +22,20 @@ export namespace CommandController {
     }
 
     export const stopCommand = async (msg: Message) => {
+        const chatId = msg.chat.id;
         if (msg.chat.type !== 'group') {
-            await global.bot.sendMessage(msg.chat.id, global.polyglot.t('command.stopInGroup'));
+            await global.bot.sendMessage(chatId, global.polyglot.t('command.stopInGroup'));
         }
-        else if (await Model.getGameStatus(msg.chat.id) !== Status.STOPPED) {
+        else if (await Model.getGameStatus(chatId) !== Status.STOPPED) {
             return Promise.all([
-                Model.setGameStatus(msg.chat.id, Status.STOPPED),
-                Model.cleanMessageInteractions(msg.chat.id),
-                global.bot.sendMessage(msg.chat.id, global.polyglot.t('command.stop')),
+                Model.setStartMessageId(chatId),
+                Model.setGameStatus(chatId, Status.STOPPED),
+                Model.cleanMessageInteractions(chatId),
+                global.bot.sendMessage(chatId, global.polyglot.t('command.stop')),
             ]);
         }
         else {
-            await global.bot.sendMessage(msg.chat.id, global.polyglot.t('start.noGame'));
+            await global.bot.sendMessage(chatId, global.polyglot.t('start.noGame'));
         }
     }
 

@@ -10,18 +10,20 @@ export namespace PreparationController {
 
     // Start a new game, asking players to join
     export const startPreparation = async (msg: Message) => {
+        const chatId = msg.chat.id;
         // Notify if game has already started
-        if (await Model.getGameStatus(msg.chat.id) !== Status.STOPPED)
-            await global.bot.sendMessage(msg.chat.id, global.polyglot.t('prepare.refuse'));
+        if (await Model.getGameStatus(chatId) !== Status.STOPPED)
+            await global.bot.sendMessage(chatId, global.polyglot.t('prepare.refuse'));
 
         // Start joining stage
         else {
-            await Model.initGame(msg.chat.id);
-            await global.bot.sendMessage(
-                msg.chat.id,
+            await Model.initGame(chatId);
+            const message = await global.bot.sendMessage(
+                chatId,
                 await getJoinMessage(msg),
                 { reply_markup: await getJoinKeyboard(msg) }
             )
+            await Model.setStartMessageId(chatId, message.message_id);
         }
 
     }
@@ -44,7 +46,7 @@ export namespace PreparationController {
         if (await Model.addPlayer(query.message.chat.id, query.from.id)) {
             const messageKey = { chat_id: query.message.chat.id, message_id: query.message.message_id }
             const replyMarkup = await getJoinKeyboard(query.message);
-            await global.bot.editMessageText(await getJoinMessage(query.message), { reply_markup: replyMarkup, ...messageKey, });
+            await global.bot.editMessageText(await getJoinMessage(query.message), { reply_markup: replyMarkup, ...messageKey, parse_mode: 'Markdown' });
 
             // When maximum nuber of players is reached start first round
             if ((await Model.numberOfPlayers(query.message.chat.id)) >= Constants.MAX_PLAYERS) {

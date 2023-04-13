@@ -17,7 +17,8 @@
             "withdraw": "Withdraw",
             "continue": "Start",
             "register": "Authorize PM",
-            "testVersionError": "You're using an experimental version, developmer must partecipate to the game."
+            "testVersionError": "You're using an experimental version, developmer must partecipate to the game.",
+            "inactive": "This message is not valid anymore"
         },
         "gameStarted": "Game started!",
         "nonJoinedContinue": "You have to join to start a game"

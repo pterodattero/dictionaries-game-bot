@@ -287,7 +287,7 @@ export namespace Model {
 
 
     // message ID methods
-    export async function setStartMessageId(chatId: number, messageId: number) {
+    export async function setStartMessageId(chatId: number, messageId?: number) {
         const game = await getGame(chatId);
         game.startMessageId = messageId;
         await game.save();
