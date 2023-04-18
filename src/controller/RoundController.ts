@@ -237,9 +237,10 @@ export namespace RoundController {
 
         if ((await Model.numberOfVotes(chatId)) >= (await Model.numberOfPlayers(chatId)) - 1) {
             // close poll
-            const [ text, keyboard ] = await Promise.all([
-                await getPollMessage(chatId, true),
-                await getPollKeyboard(chatId),
+            const [ text, keyboard, round ] = await Promise.all([
+                getPollMessage(chatId, true),
+                getPollKeyboard(chatId),
+                Model.getRound(chatId),
             ])
             await global.bot.editMessageText(
                 text,
@@ -254,10 +255,15 @@ export namespace RoundController {
 
             // send result
             let message = global.polyglot.t('round.scoreboard');
+
             for (const userId in newScore) {
                 const member = await global.bot.getChatMember(chatId, Number(userId));
                 const playerName = Utils.getUserLabel(member.user);
-                message += `\n${playerName} ${oldScore[Number(userId)]} + ${roundPoints[Number(userId)]} = ${newScore[Number(userId)]}`;
+                message += `\n${playerName} `
+                if (round) {
+                    message += `${oldScore[Number(userId)]} + ${roundPoints[Number(userId)]} = `
+                }
+                message += newScore[Number(userId)];
             }
             await global.bot.sendMessage(chatId, message, { parse_mode: 'Markdown' });
 
