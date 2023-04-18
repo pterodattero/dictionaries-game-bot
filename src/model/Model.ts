@@ -14,7 +14,7 @@ export namespace Model {
         if (!process.env.MONGODB_URI)
             throw "Invalid MONGODB_URI environment variable"
         console.log("Connecting to MongoDB...");
-        await mongoose.connect(process.env.MONGODB_URI, { dbName: process.env.DB_NAME ?? process.env.NODE_ENV });
+        await mongoose.connect(process.env.MONGODB_URI, { dbName: process.env.DB_NAME ?? process.env.VERCEL_ENV });
         console.log("Connected");
     }
 
@@ -231,6 +231,17 @@ export namespace Model {
         const playerIndex = game.players.findIndex((player) => player.userId === userId);
         game.players[playerIndex].vote = vote;
         await game.save();
+    }
+
+    export async function getVotes(chatId: number) {
+        const game = await getGame(chatId);
+        return game.players.map((playerData) => {
+            const votes = game.players.filter((el) => el.vote === playerData.userId).map((el) => el.userId);
+            return {
+                userId: playerData.userId,
+                votes,
+            }
+        })
     }
 
     export async function numberOfVotes(chatId: number): Promise<number> {

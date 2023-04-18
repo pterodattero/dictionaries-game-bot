@@ -2,10 +2,10 @@
     "start": {
         "error": "Please use this command in a group chat to play.",
         "noGame": "No game is going on in this chat.",
-        "welcome": "You have authorized me to PM with you. If you want to join a game that has already started just go back to group chat and now you can tap **Join**. If you want to start a game with your friends add me to your group chat and use /start command."
+        "welcome": "You have authorized me to PM with you. If you want to join a game that has already started just go back to group chat and now you can tap _Join_. If you want to start a game with your friends add me to your group chat and use /start command."
     },
     "prepare": {
-        "start": "Heads up, time to join! Between %{minPlayers} and %{maxPlayers} are required to play. If you haven't authorized PM yet you have to do it now. Once everyone who wants to play has joined, press the continue button to start.",
+        "start": "Heads up, time to join! Between %{minPlayers} and %{maxPlayers} are required to play. If you haven't authorized PM yet you have to do it now. Once everyone who wants to play has joined, press the _Play_ button to start.",
         "playersAlreadyJoined": "%{playersList} already joined.",
         "refuse": "A game is already going on in this chat.",
         "interactionTry": "Trying to interact with you...",
@@ -28,7 +28,8 @@
             "round": "Round %{round}/%{totalRounds}",
             "word": "%{leader} has to pick a word. I'll text you in PM when she's done.",
             "definition": "%{missingPlayers} have to enter their definition.",
-            "voteMissing": "%{missingPlayers} have to enter their vote.",
+            "voteMissing": "_%{missingPlayers} have to enter their vote._",
+            "checkVoteButtons": "_Click on the buttons below to know who voted each definition_",
             "end": "%{leader} is the leader",
             "checkBotChat": "Go to private chat"
         },

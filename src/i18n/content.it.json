@@ -2,10 +2,10 @@
     "start": {
         "error": "Per favore usa questo comando in un gruppo per giocare",
         "noGame": "Nessun gioco è in corso in questa chat",
-        "welcome": "Mi hai autorizzato a scriverti in privato. Se vuoi aderire ad un gioco già in corso torna nel gruppo e ora puoi premere *Partecipa*. Se vuoi avviare un gioco con i tuoi amici aggiungimi al vostro gruppo e usa il comando /start."
+        "welcome": "Mi hai autorizzato a scriverti in privato. Se vuoi aderire ad un gioco già in corso torna nel gruppo e ora puoi premere _Partecipa_. Se vuoi avviare un gioco con i tuoi amici aggiungimi al vostro gruppo e usa il comando /start."
     },
     "prepare": {
-        "start": "Attenzione, è tempo di farsi avanti! Sono richiesti da %{minPlayers} a %{maxPlayers} giocatori per giocare. Se non mi hai già autorizzato a scriverti in privato è il momento di farlo. Quando tutti gli interessati hanno aderito, premere il bottone Continua per iniziare.",
+        "start": "Attenzione, è tempo di farsi avanti! Sono richiesti da %{minPlayers} a %{maxPlayers} giocatori per giocare. Se non mi hai già autorizzato a scriverti in privato è il momento di farlo. Quando tutti gli interessati hanno aderito, premere il bottone _Inizia_ per iniziare.",
         "playersAlreadyJoined": "%{playersList} hanno già aderito.",
         "refuse": "Un gioco è già in corso in questa chat.",
         "interactionTry": "Provo a interagire con te...",
@@ -28,7 +28,8 @@
             "round": "Turno %{round}/%{totalRounds}",
             "word": "%{leader} deve scegliere una parola. Ti contatterò in privato quando avrà scelto.",
             "definition": "%{missingPlayers} devono ancora mandare la definizione.",
-            "voteMissing": "%{missingPlayers} devono ancora votare.",
+            "voteMissing": "_%{missingPlayers} devono ancora votare._",
+            "checkVoteButtons": "_Premi i bottoni sotto per sapere chi ha votato ciascuna definizione_",
             "end": "%{leader} è il narratore.",
             "checkBotChat": "Vai a chat privata"
         },

@@ -47,6 +47,6 @@ async function setPolling(func: () => Promise<void>, interval: number) {
     setTimeout(() => setPolling(func, interval), interval);
 }
 
-if (process.env.NODE_ENV === 'development') {
+if (process.env.VERCEL_ENV === 'development') {
     main();
 }
