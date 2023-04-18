@@ -221,14 +221,14 @@ export namespace RoundController {
         ]);
         
         // ignore votes of non playing members and leader
-        if (!players.includes(query.from.id)) {
+        if (!players.includes(query.from.id) && process.env.VERCEL_ENV !== 'development') {
             return global.bot.answerCallbackQuery(query.id, { text: global.polyglot.t('round.poll.intermission'), show_alert: true })
         }
-        if (query.from.id === leader) {
+        if (query.from.id === leader && process.env.VERCEL_ENV !== 'development') {
             return global.bot.answerCallbackQuery(query.id, { text: global.polyglot.t('round.poll.leaderIntermission'), show_alert: true })
         }
         const vote = Number(query.data.split(':')[1]);
-        if (query.from.id === vote) {
+        if (query.from.id === vote && process.env.VERCEL_ENV !== 'development') {
             return global.bot.answerCallbackQuery(query.id, { text: global.polyglot.t('round.poll.autoVote'), show_alert: true })
         }
         await global.bot.answerCallbackQuery(query.id, { text: global.polyglot.t('round.poll.voteRegistered') })
@@ -302,22 +302,25 @@ export namespace RoundController {
     }
 
     const getPollMessage = async (chatId: number, solution: boolean = false) => {
-        const [ definitions, word, leaderId ] = await Promise.all([
+        const [ definitions, word, leaderId, votes ] = await Promise.all([
             Model.getDefinitions(chatId),
             Model.getWord(chatId),
             Model.getCurrentPlayer(chatId),
+            Model.getVotes(chatId),
         ]) 
 
         let text = global.polyglot.t('round.poll.header', { word });
         for (const i in definitions) {
-            text += `\n${Number(i) + 1}. `;
+            text += `\n*${Number(i) + 1}.* `;
             if (solution) {
                 text += definitions[i].userId === leaderId ? '✔️ ' : '❌ ';
             }
             
-            text += definitions[i].definition;
+            text += `${ definitions[i].definition }`;
             if (solution) {
-                text += ` - **${ Utils.getUserLabel((await global.bot.getChatMember(chatId, definitions[i].userId)).user) }**`;
+                const label = Utils.getUserLabel((await global.bot.getChatMember(chatId, definitions[i].userId)).user);
+                const nVotes = votes.find((el) => el.userId === definitions[i].userId)?.votes.length ?? 0;
+                text += ` - _${ label } (${ nVotes })_`;
             }
         }
 
@@ -325,6 +328,8 @@ export namespace RoundController {
             text += `\n\n${global.polyglot.t('round.group.voteMissing', {
                 missingPlayers: await getPlayersString(chatId, await Model.getMissingPlayers(chatId))
             })}`;
+        } else {
+            text += `\n\n${global.polyglot.t('round.group.checkVoteButtons')}`;
         }
 
         return text;

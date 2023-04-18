@@ -21,7 +21,7 @@ export namespace PreparationController {
             const message = await global.bot.sendMessage(
                 chatId,
                 await getJoinMessage(msg),
-                { reply_markup: await getJoinKeyboard(msg) }
+                { reply_markup: await getJoinKeyboard(msg), parse_mode: 'Markdown' }
             )
             await Model.setStartMessageId(chatId, message.message_id);
         }
@@ -88,7 +88,7 @@ export namespace PreparationController {
             ]
         };
 
-        if ((numberOfPlayers >= Constants.MIN_PLAYERS) || (process.env.NODE_ENV === 'development')) {
+        if ((numberOfPlayers >= Constants.MIN_PLAYERS) || (process.env.VERCEL_ENV === 'development')) {
             keyboard.inline_keyboard[0].push({ text: global.polyglot.t('prepare.keyboard.continue'), callback_data: 'prepare:continue' })
         }
 
