@@ -80,7 +80,7 @@ export namespace RoundController {
 
         const orderedScoreGroups = Object.entries(scoreGroups).sort(entry => Number(entry[0])).reverse();
         let message = global.polyglot.t('end');
-        const medals = '🥇🥈🥉';
+        const medals = Array.from('🥇🥈🥉');
         for (const i in orderedScoreGroups) {
             const currentMedalNames = (await Promise.all(orderedScoreGroups[i][1].map((userId) => global.bot.getChatMember(chatId, userId))))
                 .map(member => Utils.getUserLabel(member.user));
