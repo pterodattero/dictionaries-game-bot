@@ -6,7 +6,7 @@
     },
     "prepare": {
         "start": "Heads up, time to join! Between %{minPlayers} and %{maxPlayers} are required to play. If you haven't authorized PM yet you have to do it now. Once everyone who wants to play has joined, press the _Play_ button to start.",
-        "playersAlreadyJoined": "%{playersList} already joined.",
+        "playersAlreadyJoined": "%{playersList} has already joined. |||| %{playersList} have already joined.",
         "refuse": "A game is already going on in this chat.",
         "interactionTry": "Trying to interact with you...",
         "interactionError": "Please authorize PM before joining",
@@ -17,7 +17,7 @@
             "withdraw": "Withdraw",
             "continue": "Start",
             "register": "Authorize PM",
-            "testVersionError": "You're using an experimental version, developmer must partecipate to the game.",
+            "testVersionError": "You're using an experimental version, developer must partecipate to the game.",
             "inactive": "This message is not valid anymore"
         },
         "gameStarted": "Game started!",
@@ -27,8 +27,8 @@
         "group": {
             "round": "Round %{round}/%{totalRounds}",
             "word": "%{leader} has to pick a word. I'll text you in PM when she's done.",
-            "definition": "%{missingPlayers} have to enter their definition.",
-            "voteMissing": "_%{missingPlayers} have to enter their vote._",
+            "definition": "%{missingPlayers} has to enter her definition. |||| %{missingPlayers} have to enter their definition.",
+            "voteMissing": "_%{missingPlayers} has to enter her vote._ |||| _%{missingPlayers} have to enter their vote._",
             "checkVoteButtons": "_Click on the buttons below to know who voted each definition_",
             "end": "%{leader} is the leader",
             "checkBotChat": "Go to private chat"

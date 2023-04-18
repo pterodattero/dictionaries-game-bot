@@ -181,7 +181,7 @@ export namespace RoundController {
 
     const editGroupMessage = async (chatId: number, groupMessageId: number) => {
         // Update round message on group chat
-        const missingPlayersString = 
+        const missingPlayers = await Model.getMissingPlayers(chatId);
         await global.bot.editMessageText(
             [
                 global.polyglot.t('round.group.round', {
@@ -189,7 +189,8 @@ export namespace RoundController {
                     totalRounds: await Model.numberOfPlayers(chatId),
                 }),
                 global.polyglot.t('round.group.definition', {
-                    missingPlayers: await getPlayersString(chatId, await Model.getMissingPlayers(chatId))
+                    missingPlayers: await getPlayersString(chatId, missingPlayers),
+                    smart_count: missingPlayers.length,
                 })
             ].join('\n'),
             { reply_markup: await getCheckBotChatReplyMarkup(), chat_id: chatId, message_id: groupMessageId, parse_mode: 'Markdown' }
@@ -325,8 +326,10 @@ export namespace RoundController {
         }
 
         if (!solution) {
+            const missingPlayers = await Model.getMissingPlayers(chatId);
             text += `\n\n${global.polyglot.t('round.group.voteMissing', {
-                missingPlayers: await getPlayersString(chatId, await Model.getMissingPlayers(chatId))
+                missingPlayers: await getPlayersString(chatId, missingPlayers),
+                smart_count: missingPlayers.length,
             })}`;
         } else {
             text += `\n\n${global.polyglot.t('round.group.checkVoteButtons')}`;
