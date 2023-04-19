@@ -150,8 +150,7 @@ const inferLanguageFromUpdate = async (update: Update) => {
     }
     const chatId = update.message?.chat.type === 'group' ? update.message?.chat.id
         : update.callback_query ? update.callback_query.message?.chat.id
-        : update.message?.from ? await safeGetMessageInteraction()
-        : update.message?.from?.id;
+        : await safeGetMessageInteraction() ?? update.message?.from?.id;
     const language = await Model.getLanguange(chatId);
     return language;
 }
