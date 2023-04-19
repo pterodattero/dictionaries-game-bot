@@ -333,6 +333,7 @@ export namespace Model {
         }
         await Rounds.create({
             chatId,
+            startMessageId: game.startMessageId,
             pollMessageId: game.pollMessageId,
             votes: Object.entries(userVotes).map(([ userId, votes ]) => ({ userId, votes })),
         });
