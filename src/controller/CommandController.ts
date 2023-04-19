@@ -29,6 +29,7 @@ export namespace CommandController {
         else if (await Model.getGameStatus(chatId) !== Status.STOPPED) {
             return Promise.all([
                 Model.setStartMessageId(chatId),
+                Model.setLapEndMessageId(chatId),
                 Model.setGameStatus(chatId, Status.STOPPED),
                 Model.cleanMessageInteractions(chatId),
                 global.bot.sendMessage(chatId, global.polyglot.t('command.stop')),

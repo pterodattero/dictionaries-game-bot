@@ -26,11 +26,7 @@ export namespace RoundController {
     // Start a new round
     export const newRound = async (chatId: number) => {
         if (!(await Model.initRound(chatId))) {
-            // Give prizes
-            return Promise.all([
-                finalScoreboard(chatId),
-                Model.cleanMessageInteractions(chatId),
-            ])
+            return continueOrTerminate(chatId);
         }
         else {
             await Model.setGameStatus(chatId, Status.QUESTION);
@@ -87,6 +83,29 @@ export namespace RoundController {
             message += `\n${medals[i] ?? ''} ${currentMedalNames.join(', ')}: ${orderedScoreGroups[i][0]} `;
         }
         await global.bot.sendMessage(chatId, message, { parse_mode: 'Markdown' });
+    }
+
+    // ask the users wheter to do another lap or not
+    const continueOrTerminate = async (chatId: number) => {
+        const keyboard: InlineKeyboardButton[][] = [[
+            { text: global.polyglot.t('round.lapEnd.continue'), callback_data: 'lapEnd:continue' },
+            { text: global.polyglot.t('round.lapEnd.end'), callback_data: 'lapEnd:end' },
+        ]]
+        const message = await global.bot.sendMessage(
+            chatId,
+            global.polyglot.t('round.lapEnd.message'),
+            { reply_markup: { inline_keyboard: keyboard } }
+        );
+        await Model.setLapEndMessageId(chatId, message.message_id);
+    }
+
+    // Give prizes and reset message interactions
+    export const endGame = async (chatId: number) => {
+        return Promise.all([
+            finalScoreboard(chatId),
+            Model.cleanMessageInteractions(chatId),
+            Model.setGameStatus(chatId, Status.STOPPED),
+        ])
     }
 
     // Receive the round word from leader and notify players
@@ -237,10 +256,11 @@ export namespace RoundController {
 
         if ((await Model.numberOfVotes(chatId)) >= (await Model.numberOfPlayers(chatId)) - 1) {
             // close poll
-            const [ text, keyboard, round ] = await Promise.all([
+            const [ text, keyboard, round, lap ] = await Promise.all([
                 getPollMessage(chatId, true),
                 getPollKeyboard(chatId),
                 Model.getRound(chatId),
+                Model.getLap(chatId),
             ])
             await global.bot.editMessageText(
                 text,
@@ -260,7 +280,7 @@ export namespace RoundController {
                 const member = await global.bot.getChatMember(chatId, Number(userId));
                 const playerName = Utils.getUserLabel(member.user);
                 message += `\n${playerName} `
-                if (round) {
+                if (round || lap) {
                     message += `${oldScore[Number(userId)]} + ${roundPoints[Number(userId)]} = `
                 }
                 message += newScore[Number(userId)];
