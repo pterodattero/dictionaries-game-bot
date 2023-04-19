@@ -20,7 +20,7 @@ export namespace RoundController {
         }
         await global.bot.answerCallbackQuery(query.id);
         await global.bot.editMessageText(global.polyglot.t('prepare.gameStarted'), { chat_id: chatId, message_id: query.message?.message_id });
-        setTimeout(() => newRound(chatId), Constants.NEXT_ROUND_WAIT);
+        await newRound(chatId);
     }
 
     // Start a new round
@@ -269,7 +269,7 @@ export namespace RoundController {
 
             // start new round
             await Model.archiveCurrentRound(chatId);
-            await newRound(chatId);
+            setTimeout(() => newRound(chatId), Constants.NEXT_ROUND_WAIT);
         } else {
             // only update message
             const [ text, keyboard ] = await Promise.all([
