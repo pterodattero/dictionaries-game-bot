@@ -144,9 +144,15 @@ export namespace Model {
         return game.round;
     }
 
+    export async function getLap(chatId: number): Promise<number | undefined> {
+        const game = await getGame(chatId);
+        return game.lap;
+    }
+
     export async function initRound(chatId: number): Promise<boolean> {
         const game = await getGame(chatId);
         game.pollMessageId = undefined;
+        game.lapEndMessageId = undefined;
 
         for (const player of game.players) {
             player.definition = undefined;
@@ -155,14 +161,20 @@ export namespace Model {
 
         game.word = undefined;
 
-        if (game.round === undefined)
+        if (game.round === undefined) {
             game.round = 0;
-        else
+            if (game.lap === undefined) {
+                game.lap = 0;
+            } else {
+                game.lap += 1;
+            }
+        }
+        else {
             game.round += 1;
+        }
 
         if (game.round === await numberOfPlayers(chatId)) {
             game.round = undefined;
-            game.status = Status.STOPPED;
             await game.save();
             return false;
         }
@@ -318,6 +330,17 @@ export namespace Model {
     export async function getPollMessageId(chatId: number) {
         const game = await getGame(chatId);
         return game.pollMessageId;
+    }    
+
+    export async function setLapEndMessageId(chatId: number, messageId?: number) {
+        const game = await getGame(chatId);
+        game.lapEndMessageId = messageId;
+        await game.save();
+    }    
+
+    export async function getLapEndMessageId(chatId: number) {
+        const game = await getGame(chatId);
+        return game.lapEndMessageId;
     }    
 
 

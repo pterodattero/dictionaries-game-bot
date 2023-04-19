@@ -77,6 +77,26 @@ const handleCallbackQuery = async (query: CallbackQuery) => {
                     else {
                         return RoundController.seeVotes(query);
                     }
+                case 'lapEnd':
+                    if (query.message.message_id !== await Model.getLapEndMessageId(chatId)) {
+                        return global.bot.answerCallbackQuery(query.id, { text: global.polyglot.t('prepare.keyboard.inactive') });
+                    }
+                    await global.bot.answerCallbackQuery(query.id);
+                    switch (suffix) {
+                        case 'end':
+                            return Promise.all([
+                                global.bot.deleteMessage(chatId, query.message.message_id),
+                                RoundController.endGame(chatId),
+                            ]);
+                        case 'continue':
+                            return Promise.all([
+                                global.bot.editMessageText(
+                                    global.polyglot.t('round.lapEnd.newLap'),
+                                    { chat_id: chatId, message_id: query.message.message_id}
+                                ),
+                                RoundController.newRound(chatId),
+                            ]);
+                    }
                 default:
                     throw 'Unrecognized query data';
             }

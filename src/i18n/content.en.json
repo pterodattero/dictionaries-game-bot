@@ -56,6 +56,12 @@
             "notFound": "I'm having some troubles in fetching data...",
             "votedBy": "Voted by: %{players}",
             "noVotes": "No one voted for this definition"
+        },
+        "lapEnd": {
+            "message": "Lap finished. Do you want to keep playing or to see the final results?",
+            "end": "Final results",
+            "continue": "Keep playing",
+            "newLap": "New lap started!"
         }
     },
     "invalidInteraction": "What?",

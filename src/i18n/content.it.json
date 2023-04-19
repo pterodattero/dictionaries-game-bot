@@ -57,6 +57,12 @@
             "notFound": "Sto avendo qualche problema a recuperare i dati...",
             "votedBy": "Votata da: %{players}",
             "noVotes": "Nessuno ha votato questa definizione"
+        },
+        "lapEnd": {
+            "message": "Giro finito. Volete continuare a giocare o vedere i risultati finali?",
+            "end": "Risultati",
+            "continue": "Continua",
+            "newLap": "Nuovo giro iniziato!"
         }
     },
     "invalidInteraction": "Cosa?",
