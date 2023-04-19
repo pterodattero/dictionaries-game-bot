@@ -73,7 +73,7 @@
     "language": {
         "select": "Seleziona la lingua.",
         "doneGroup": "Lingua impostata a italiano. Anche i messaggi privati collegati a questo gruppo sarenno in questa lingua. Se vuoi cambiare il linguaggio anche nei messaggi privati non dipendenti dal gioco usa il comando /language nella chat con il bot.",
-        "donePrivate": "Lingua impostata a italiano. "
+        "donePrivate": "Lingua impostata a italiano. Questa impostazione non ha effetto sui messaggi relativi a giochi, per quelli deve essere impostata nel corrispondente gruppo con il comando /language."
     },
     "about": "Questo progetto è open source. Se vuoi contribuire con proposte, segnalazioni, nuove funzionalità o traduzioni dai un'occhiata a [questa repository](https://github.com/pterodattero/dictionaries-game-bot). Se hai apprezzato il gioco considera di fare una donazione con il comando /donate.",
     "donate": "Supporta lo sviluppatore! Questo progetto non è a scopo di lucro, ma apprezzo un supporto finanziario ❤️",
