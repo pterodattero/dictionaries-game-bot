@@ -107,7 +107,7 @@ export namespace PreparationController {
         const members = await Promise.all(playerIds.map(((userId) => global.bot.getChatMember(msg.chat.id, userId))));
         const playerNames = members.map(((member) => Utils.getUserLabel(member.user)));
         if (playerNames.length) {
-            message += `\n\n_${global.polyglot.t('prepare.playersAlreadyJoined', { playersList: playerNames.join(', '), smart_count: members.length })}_`;
+            message += `\n\n${global.polyglot.t('prepare.playersAlreadyJoined', { playersList: playerNames.join(', '), smart_count: members.length })}`;
         }
         return message;
     }
