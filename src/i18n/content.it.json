@@ -28,8 +28,8 @@
             "round": "Turno %{round}/%{totalRounds}",
             "word": "%{leader} deve scegliere una parola. Ti contatterò in privato quando avrà scelto.",
             "definition": "%{missingPlayers} deve mandare la definizione. |||| %{missingPlayers} devono mandare la definizione.",
-            "voteMissing": "_%{missingPlayers} deve votare._ |||| _%{missingPlayers} devono votare._",
-            "checkVoteButtons": "_Premi i bottoni sotto per sapere chi ha votato ciascuna definizione_",
+            "voteMissing": "%{missingPlayers} deve votare. |||| %{missingPlayers} devono votare.",
+            "checkVoteButtons": "Premi i bottoni sotto per sapere chi ha votato ciascuna definizione",
             "end": "%{leader} è il narratore.",
             "checkBotChat": "Vai a chat privata"
         },

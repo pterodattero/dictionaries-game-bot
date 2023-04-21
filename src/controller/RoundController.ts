@@ -347,7 +347,7 @@ export namespace RoundController {
             if (solution) {
                 const label = Utils.getUserLabel((await global.bot.getChatMember(chatId, definitions[i].userId)).user);
                 const nVotes = votes.find((el) => el.userId === definitions[i].userId)?.votes.length ?? 0;
-                text += ` - _${ label } (${ nVotes })_`;
+                text += ` - ${ label } (${ nVotes })`;
             }
         }
 

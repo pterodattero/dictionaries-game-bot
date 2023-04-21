@@ -28,8 +28,8 @@
             "round": "Round %{round}/%{totalRounds}",
             "word": "%{leader} has to pick a word. I'll text you in PM when she's done.",
             "definition": "%{missingPlayers} has to enter her definition. |||| %{missingPlayers} have to enter their definition.",
-            "voteMissing": "_%{missingPlayers} has to enter her vote._ |||| _%{missingPlayers} have to enter their vote._",
-            "checkVoteButtons": "_Click on the buttons below to know who voted each definition_",
+            "voteMissing": "%{missingPlayers} has to enter her vote. |||| %{missingPlayers} have to enter their vote.",
+            "checkVoteButtons": "Click on the buttons below to know who voted each definition",
             "end": "%{leader} is the leader",
             "checkBotChat": "Go to private chat"
         },
