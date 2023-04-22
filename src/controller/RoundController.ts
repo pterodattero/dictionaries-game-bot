@@ -50,12 +50,12 @@ export namespace RoundController {
             // Contact privately the leader
             const language = await Model.getLanguange(chatId);
             const resources: { text: string, url: string }[] = JSON.parse((await Fs.readFile(Path.resolve(__dirname, '../i18n', `resources.${language}.json`))).toString());
+            const chatTitle = (await global.bot.getChat(chatId)).title ?? '';
             const message = await global.bot.sendMessage(
                 leader.id,
-                global.polyglot.t('round.leader.word', { chat: (await global.bot.getChat(chatId)).title }),
+                global.polyglot.t('round.leader.word', { chat: TextUtils.escapeHtml(chatTitle) }),
                 {
                     reply_markup: {
-                        force_reply: true,
                         inline_keyboard: [resources],
                     }
                 }
@@ -131,12 +131,12 @@ export namespace RoundController {
 
         for (const userId of players) {
             const text = (userId == msg.from.id)
-                ? global.polyglot.t('round.leader.definition', { word })
-                : global.polyglot.t('round.player.definition', { word, leader: TextUtils.getUserLabel(msg.from) });
+                ? global.polyglot.t('round.leader.definition', { word: TextUtils.escapeHtml(word) })
+                : global.polyglot.t('round.player.definition', { word: TextUtils.escapeHtml(word), leader: TextUtils.getUserLabel(msg.from) });
             const message = await global.bot.sendMessage(
                 userId,
                 text,
-                { reply_markup: { force_reply: true }, parse_mode: 'HTML' }
+                { parse_mode: 'HTML' }
             );
             await Model.setMessageInteraction(userId, message.message_id, chatId, groupMessageId);
         }
