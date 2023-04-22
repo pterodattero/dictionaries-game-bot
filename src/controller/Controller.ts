@@ -9,9 +9,17 @@ import * as I18n from "../i18n";
 import { LanguageController } from "./LanguageController";
 
 
-const handleCommand = async (msg: Message, language: string) => {
+const handleCommand = async (msg: Message) => {
     try {
-        switch (msg.text?.substring(1)) {
+        if (!msg.text) {
+            return;
+        }
+        const [ command, scope ] = msg.text?.substring(1).split('@');
+        if (scope && scope !== (await global.bot.getMe()).username) {
+            return;
+        }
+
+        switch (command) {
             case 'start':
                 await CommandController.startCommand(msg);
                 break;
@@ -164,8 +172,9 @@ const handleUpdate = async (update: Update) => {
     const language = await inferLanguageFromUpdate(update);
     await I18n.init(language);
 
-    if (update.message?.text && update.message.text.match(/^\/\w+$/)) {
-        await handleCommand(update.message, language);
+    const commandRegex = /^\/[A-Za-z_]+(\@[A-Za-z_]+){0,1}$/; 
+    if (update.message?.text && update.message.text.match(commandRegex)) {
+        await handleCommand(update.message);
     } else if (update.callback_query) {
         await handleCallbackQuery(update.callback_query);
     } else if (update.message) {
