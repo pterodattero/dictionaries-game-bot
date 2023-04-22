@@ -52,7 +52,7 @@ export namespace CommandController {
     }
 
     export const aboutCommand = async (msg: Message) => {
-        await global.bot.sendMessage(msg.chat.id, global.polyglot.t('about'), { parse_mode: "Markdown" });
+        await global.bot.sendMessage(msg.chat.id, global.polyglot.t('about'), { parse_mode: "HTML" });
     }
 
     export const donateCommand = async (msg: Message) => {

@@ -2,10 +2,10 @@
     "start": {
         "error": "Please use this command in a group chat to play.",
         "noGame": "No game is going on in this chat.",
-        "welcome": "You have authorized me to PM with you. If you want to join a game that has already started just go back to group chat and now you can tap _Join_. If you want to start a game with your friends add me to your group chat and use /start command."
+        "welcome": "You have authorized me to PM with you. If you want to join a game that has already started just go back to group chat and now you can tap <i>Join</i>. If you want to start a game with your friends add me to your group chat and use /start command."
     },
     "prepare": {
-        "start": "Heads up, time to join! Between %{minPlayers} and %{maxPlayers} are required to play. If you haven't authorized PM yet you have to do it now. Once everyone who wants to play has joined, press the _Play_ button to start.",
+        "start": "Heads up, time to join! Between %{minPlayers} and %{maxPlayers} are required to play. If you haven't authorized PM yet you have to do it now. Once everyone who wants to play has joined, press the <i>Play</i> button to start.",
         "playersAlreadyJoined": "%{playersList} has already joined. |||| %{playersList} have already joined.",
         "refuse": "A game is already going on in this chat.",
         "interactionTry": "Trying to interact with you...",
@@ -47,7 +47,7 @@
         "tooLongDefinitionError": "A definition can be at most %{maxLength} long.",
         "scoreboard": "Scoreboard:",
         "poll": {
-            "header": "*Which is the correct definition of '%{word}'?*",
+            "header": "Which is the correct definition of '%{word}'?",
             "intermission": "You're not playing in this game, so your vote won't be considered",
             "leaderIntermission": "You're not playing in this round, so your vote won't be considered",
             "autoVote": "You can't vote for yourself",
@@ -73,7 +73,7 @@
         "doneGroup": "Language set to English for this group. Also private messages related to this group will be in this language. If you want to change language also in game independent PMs use /language command in bot chat.",
         "donePrivate": "Language set to English. This settings does not affect language used in games, which has to be set in the corresponding group with /language command."
     },
-    "about": "This project is open source. If you want to contribute with proposals, issue reports, new features or translations take a look at [this repository](https://github.com/pterodattero/dictionaries-game-bot). If you enjoyed playing consider a donation with /donate command.",
+    "about": "This project is open source. If you want to contribute with proposals, issue reports, new features or translations take a look at <a href=\"https://github.com/pterodattero/dictionaries-game-bot\">this repository</a>. If you enjoyed playing consider a donation with /donate command.",
     "donate": "Support the developer! This project is not made for profict, but financial support is appreciated ❤️",
     "command": {
         "stop": "Game stopped.",
