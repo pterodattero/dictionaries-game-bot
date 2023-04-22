@@ -9,7 +9,7 @@
         "playersAlreadyJoined": "%{playersList} ha già aderito. |||| %{playersList} hanno già aderito.",
         "refuse": "Un gioco è già in corso in questa chat.",
         "interactionTry": "Provo a interagire con te...",
-        "interactionError": "Per favore autorizzami a mandarti messaggi privati per partecipare",
+        "interactionError": "Autorizza PM e poi puoi partecipare. Dovrai farlo solo questa volta.",
         "alreadyJoined": "Hai già aderito",
         "notJoined": "Non hai ancora aderito",
         "keyboard": {
@@ -68,7 +68,7 @@
     "invalidInteraction": "Cosa?",
     "end": "Gioco finito!",
     "replyAlert": "Se stai giocando in più di un gioco alla volta devi rispondere ai miei messaggi per evitare ambiguità (i.e. trascina a sinistra i miei messaggi)",
-    "help": "Il narratore sceglie una parola strana, inusuale dal dizionario. L'obiettivo è scegliere una parola che nessuno ha mai sentito, e il cui significato è di difficile intuizione. Mentre il narratore inserisce la definizione corretta, ciascun giocatore inserisce una sua definizione fasulla ma credibile. Poi, il bot invia un sondaggio con le definizioni mischiate e anonime. I giocatori devono votare per quella che credono la definizione corretta.\nPunti:\n - i giocatori prendono %{guessPoints} pt. per aver indovinato la definizione corretta, ma se tutti indovinano prendono %{everyoneGuessedPoints}\n - se tutti indovinano, il narratore prende %{everyoneGuessedLeaderPoints} pt. \n - altrimenti prende %{notEveryoneGuessedLeaderPoints} pt. \n - inoltre, in giocatore prendono %{votePoints} pt. per ogni voto ricevuto \nDopo che tutti hanno giocato da narratore, chi ha più punti vince!",
+    "help": "Il narratore sceglie una parola strana, inusuale dal dizionario. L'obiettivo è scegliere una parola che nessuno ha mai sentito, e il cui significato è di difficile intuizione. Mentre il narratore inserisce la definizione corretta, ciascun giocatore inserisce una sua definizione fasulla ma credibile. Poi, il bot invia un sondaggio con le definizioni mischiate e anonime. I giocatori devono votare quella che credono la definizione corretta.\nPunti:\n - i giocatori prendono %{guessPoints} pt. per aver indovinato la definizione corretta, ma se tutti indovinano prendono %{everyoneGuessedPoints}\n - se tutti indovinano, il narratore prende %{everyoneGuessedLeaderPoints} pt. \n - altrimenti prende %{notEveryoneGuessedLeaderPoints} pt. \n - inoltre, i giocatori prendono %{votePoints} pt. per ogni voto ricevuto \nChi fa più punti vince!",
     "resources": "Ecco qualche risorsa:",
     "language": {
         "select": "Seleziona la lingua.",
