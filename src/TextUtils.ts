@@ -7,10 +7,14 @@ import Constants from "./constants";
 export namespace TextUtils {
 
     export const getUserLabel = (user: User, mentions: boolean = true) => {
-        if (mentions) {
-            return user.username ? `@${user.username}` : `<a href="tg://user?id=${user.id}">${user.first_name} ${user.last_name}</a>`;
+        if (user.username) {
+            return `@${escapeHtml(user.username)}`;
         }
-        return user.username ? `@${user.username}` : `${user.first_name} ${user.last_name}`;
+        const nameSurnameString = `${escapeHtml(user.first_name)}${user.last_name ? ` ${ escapeHtml(user.last_name)}` : ''}`;
+        if (!mentions) {
+            return nameSurnameString;
+        }
+        return `<a href="tg://user?id=${user.id}">${nameSurnameString}</a>`;
     }
 
     export const getCheckBotChatReplyMarkup = async () => {
@@ -34,7 +38,7 @@ export namespace TextUtils {
                 text += definitions[i].userId === leaderId ? '✔️ ' : '❌ ';
             }
 
-            text += `${definitions[i].definition}`;
+            text += escapeHtml(definitions[i].definition);
             if (solution) {
                 const label = getUserLabel((await global.bot.getChatMember(chatId, definitions[i].userId)).user);
                 const nVotes = votes.find((el) => el.userId === definitions[i].userId)?.votes.length ?? 0;
@@ -85,6 +89,15 @@ export namespace TextUtils {
             message += `\n\n<i>${global.polyglot.t('prepare.playersAlreadyJoined', { playersList: playerNames.join(', '), smart_count: members.length })}</i>`;
         }
         return message;
+    }
+
+    export const escapeHtml = (text: string) => {
+        return text
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
     }
 
 }
