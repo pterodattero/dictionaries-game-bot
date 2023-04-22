@@ -2,22 +2,21 @@ import { Message } from "node-telegram-bot-api";
 
 import { Model } from "../model/Model";
 import { Status } from "../model/Game";
-import { Language, LanguageController } from "./LanguageController";
+import { LanguageController } from "./LanguageController";
 import { PreparationController } from "./PreparationController";
 import Constants from "../constants";
 
 export namespace CommandController {
 
     export const startCommand = async (msg: Message) => {
+        if (!(await Model.isChatInitialized(msg.chat.id))) {
+            return LanguageController.languageCommand(msg, 'start');
+        }
         if (msg.chat.type !== "group") {
-            if (!(await Model.isChatInitialized(msg.chat.id))) {
-                return LanguageController.languageCommand(msg, 'start');
-            } else {
-                return global.bot.sendMessage(msg.chat.id, global.polyglot.t('start.error'));
-            }
+            return global.bot.sendMessage(msg.chat.id, global.polyglot.t('start.error'));
         }
         else {
-            await PreparationController.startPreparation(msg);
+            return PreparationController.startPreparation(msg);
         }
     }
 
