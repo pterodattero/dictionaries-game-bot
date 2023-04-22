@@ -2,10 +2,10 @@
     "start": {
         "error": "Per favore usa questo comando in un gruppo per giocare",
         "noGame": "Nessun gioco è in corso in questa chat",
-        "welcome": "Mi hai autorizzato a scriverti in privato. Se vuoi aderire ad un gioco già in corso torna nel gruppo e ora puoi premere _Partecipa_. Se vuoi avviare un gioco con i tuoi amici aggiungimi al vostro gruppo e usa il comando /start."
+        "welcome": "Mi hai autorizzato a scriverti in privato. Se vuoi aderire ad un gioco già in corso torna nel gruppo e ora puoi premere <i>Partecipa</i>. Se vuoi avviare un gioco con i tuoi amici aggiungimi al vostro gruppo e usa il comando /start."
     },
     "prepare": {
-        "start": "Attenzione, è tempo di farsi avanti! Sono richiesti da %{minPlayers} a %{maxPlayers} giocatori per giocare. Se non mi hai già autorizzato a scriverti in privato è il momento di farlo. Quando tutti gli interessati hanno aderito, premere il bottone _Inizia_ per iniziare.",
+        "start": "Attenzione, è tempo di farsi avanti! Sono richiesti da %{minPlayers} a %{maxPlayers} giocatori per giocare. Se non mi hai già autorizzato a scriverti in privato è il momento di farlo. Quando tutti gli interessati hanno aderito, premere il bottone <i>Inizia</i> per iniziare.",
         "playersAlreadyJoined": "%{playersList} ha già aderito. |||| %{playersList} hanno già aderito.",
         "refuse": "Un gioco è già in corso in questa chat.",
         "interactionTry": "Provo a interagire con te...",
@@ -48,7 +48,7 @@
         "tooLongDefinitionError": "Una definizione può essere al massimo lunga %{maxLength} caratteri.",
         "scoreboard": "Punteggio:",
         "poll": {
-            "header": "*Qual'è la definizione corretta di '%{word}'*?",
+            "header": "Qual'è la definizione corretta di '%{word}'?",
             "intermission": "Non stai giocando in questo gioco, il tuo voto non sarà considerato",
             "leaderIntermission": "Non stai giocando in questo turno, il tuo voto non sarà considerato",
             "autoVote": "Non puoi autovotarti",
@@ -75,7 +75,7 @@
         "doneGroup": "Lingua impostata a italiano. Anche i messaggi privati collegati a questo gruppo sarenno in questa lingua. Se vuoi cambiare il linguaggio anche nei messaggi privati non dipendenti dal gioco usa il comando /language nella chat con il bot.",
         "donePrivate": "Lingua impostata a italiano. Questa impostazione non ha effetto sui messaggi relativi a giochi, per quelli deve essere impostata nel corrispondente gruppo con il comando /language."
     },
-    "about": "Questo progetto è open source. Se vuoi contribuire con proposte, segnalazioni, nuove funzionalità o traduzioni dai un'occhiata a [questa repository](https://github.com/pterodattero/dictionaries-game-bot). Se hai apprezzato il gioco considera di fare una donazione con il comando /donate.",
+    "about": "Questo progetto è open source. Se vuoi contribuire con proposte, segnalazioni, nuove funzionalità o traduzioni dai un'occhiata a <a href=\"https://github.com/pterodattero/dictionaries-game-bot\">questa repository</a>. Se hai apprezzato il gioco considera di fare una donazione con il comando /donate.",
     "donate": "Supporta lo sviluppatore! Questo progetto non è a scopo di lucro, ma apprezzo un supporto finanziario ❤️",
     "command": {
         "stop": "Gioco fermato.",

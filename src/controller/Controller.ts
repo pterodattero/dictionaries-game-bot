@@ -67,7 +67,7 @@ const handleCallbackQuery = async (query: CallbackQuery) => {
                     return LanguageController.languageCallback(query);
                 case 'start':
                     await LanguageController.languageCallback(query);
-                    return global.bot.sendMessage(chatId, global.polyglot.t('start.welcome'), { parse_mode: 'Markdown' });
+                    return global.bot.sendMessage(chatId, global.polyglot.t('start.welcome'), { parse_mode: 'HTML' });
                 case 'poll':
                     const pollMessageId = query.message.message_id;
                     // round is still open

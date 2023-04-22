@@ -4,7 +4,7 @@ import Path from 'path';
 
 import { Model } from "../model/Model"
 import { Status } from "../model/Game";
-import { Utils } from "./Utils";
+import { TextUtils } from "../TextUtils";
 import Constants from "../constants";
 
 export namespace RoundController {
@@ -41,10 +41,10 @@ export namespace RoundController {
                         totalRounds: await Model.numberOfPlayers(chatId),
                     }),
                     global.polyglot.t('round.group.word', {
-                        leader: Utils.getUserLabel(leader),
+                        leader: TextUtils.getUserLabel(leader),
                     })
                 ].join('\n'),
-                { reply_markup: await getCheckBotChatReplyMarkup(), parse_mode: 'Markdown' }
+                { reply_markup: await TextUtils.getCheckBotChatReplyMarkup(), parse_mode: 'HTML' }
             );
 
             // Contact privately the leader
@@ -79,10 +79,10 @@ export namespace RoundController {
         const medals = Array.from('🥇🥈🥉');
         for (const i in orderedScoreGroups) {
             const currentMedalNames = (await Promise.all(orderedScoreGroups[i][1].map((userId) => global.bot.getChatMember(chatId, userId))))
-                .map(member => Utils.getUserLabel(member.user));
+                .map(member => TextUtils.getUserLabel(member.user));
             message += `\n${medals[i] ?? ''} ${currentMedalNames.join(', ')}: ${orderedScoreGroups[i][0]} `;
         }
-        await global.bot.sendMessage(chatId, message, { parse_mode: 'Markdown' });
+        await global.bot.sendMessage(chatId, message, { parse_mode: 'HTML' });
     }
 
     // ask the users wheter to do another lap or not
@@ -132,11 +132,11 @@ export namespace RoundController {
         for (const userId of players) {
             const text = (userId == msg.from.id)
                 ? global.polyglot.t('round.leader.definition', { word })
-                : global.polyglot.t('round.player.definition', { word, leader: Utils.getUserLabel(msg.from) });
+                : global.polyglot.t('round.player.definition', { word, leader: TextUtils.getUserLabel(msg.from) });
             const message = await global.bot.sendMessage(
                 userId,
                 text,
-                { reply_markup: { force_reply: true }, parse_mode: 'Markdown' }
+                { reply_markup: { force_reply: true }, parse_mode: 'HTML' }
             );
             await Model.setMessageInteraction(userId, message.message_id, chatId, groupMessageId);
         }
@@ -185,10 +185,10 @@ export namespace RoundController {
                         totalRounds: await Model.numberOfPlayers(chatId),
                     }),
                     global.polyglot.t('round.group.end', {
-                        leader: Utils.getUserLabel(leader),
+                        leader: TextUtils.getUserLabel(leader),
                     })
                 ].join('\n'),
-                { chat_id: chatId, message_id: groupMessageId, parse_mode: 'Markdown' }
+                { chat_id: chatId, message_id: groupMessageId, parse_mode: 'HTML' }
             );
         }
         else {
@@ -208,11 +208,11 @@ export namespace RoundController {
                     totalRounds: await Model.numberOfPlayers(chatId),
                 }),
                 global.polyglot.t('round.group.definition', {
-                    missingPlayers: await getPlayersString(chatId, missingPlayers),
+                    missingPlayers: await TextUtils.getPlayersString(chatId, missingPlayers),
                     smart_count: missingPlayers.length,
                 })
             ].join('\n'),
-            { reply_markup: await getCheckBotChatReplyMarkup(), chat_id: chatId, message_id: groupMessageId, parse_mode: 'Markdown' }
+            { reply_markup: await TextUtils.getCheckBotChatReplyMarkup(), chat_id: chatId, message_id: groupMessageId, parse_mode: 'HTML' }
         );
     }
 
@@ -220,11 +220,11 @@ export namespace RoundController {
     export const sendPoll = async (chatId: number) => {
         await Model.shuffleDefinitions(chatId);
         const [ text, keyboard ] = await Promise.all([
-            await getPollMessage(chatId),
-            await getPollKeyboard(chatId),
+            await TextUtils.getPollMessage(chatId),
+            await TextUtils.getPollKeyboard(chatId),
         ])
 
-        const message = await global.bot.sendMessage(chatId, text, { reply_markup: { inline_keyboard: keyboard }, parse_mode: 'Markdown' });
+        const message = await global.bot.sendMessage(chatId, text, { reply_markup: { inline_keyboard: keyboard }, parse_mode: 'HTML' });
         await Model.setPollMessageId(chatId, message.message_id);
     }
 
@@ -257,14 +257,14 @@ export namespace RoundController {
         if ((await Model.numberOfVotes(chatId)) >= (await Model.numberOfPlayers(chatId)) - 1) {
             // close poll
             const [ text, keyboard, round, lap ] = await Promise.all([
-                getPollMessage(chatId, true),
-                getPollKeyboard(chatId),
+                TextUtils.getPollMessage(chatId, true),
+                TextUtils.getPollKeyboard(chatId),
                 Model.getRound(chatId),
                 Model.getLap(chatId),
             ])
             await global.bot.editMessageText(
                 text,
-                { reply_markup: { inline_keyboard: keyboard }, chat_id: chatId, message_id: query.message?.message_id, parse_mode: 'Markdown' },
+                { reply_markup: { inline_keyboard: keyboard }, chat_id: chatId, message_id: query.message?.message_id, parse_mode: 'HTML' },
             );            
 
             // update scores
@@ -278,14 +278,14 @@ export namespace RoundController {
 
             for (const userId in newScore) {
                 const member = await global.bot.getChatMember(chatId, Number(userId));
-                const playerName = Utils.getUserLabel(member.user);
+                const playerName = TextUtils.getUserLabel(member.user);
                 message += `\n${playerName} `
                 if (round || lap) {
                     message += `${oldScore[Number(userId)]} + ${roundPoints[Number(userId)]} = `
                 }
                 message += newScore[Number(userId)];
             }
-            await global.bot.sendMessage(chatId, message, { parse_mode: 'Markdown' });
+            await global.bot.sendMessage(chatId, message, { parse_mode: 'HTML' });
 
             // start new round
             await Model.archiveCurrentRound(chatId);
@@ -293,11 +293,11 @@ export namespace RoundController {
         } else {
             // only update message
             const [ text, keyboard ] = await Promise.all([
-                await getPollMessage(chatId),
-                await getPollKeyboard(chatId),
+                await TextUtils.getPollMessage(chatId),
+                await TextUtils.getPollKeyboard(chatId),
             ])
     
-            await global.bot.editMessageText(text, { chat_id: chatId, message_id: query.message?.message_id, reply_markup: { inline_keyboard: keyboard }, parse_mode: 'Markdown' });
+            await global.bot.editMessageText(text, { chat_id: chatId, message_id: query.message?.message_id, reply_markup: { inline_keyboard: keyboard }, parse_mode: 'HTML' });
         }
     }
 
@@ -312,76 +312,13 @@ export namespace RoundController {
             const userId = Number(query.data.split(':')[1]);
             const userVotes = votes.find((el) => el.userId === userId);
             const text = userVotes
-                ? global.polyglot.t('round.poll.votedBy', { players: await getPlayersString(chatId, userVotes.votes, false) })
+                ? global.polyglot.t('round.poll.votedBy', { players: await TextUtils.getPlayersString(chatId, userVotes.votes, false) })
                 : global.polyglot.t('round.poll.noVotes');
             return global.bot.answerCallbackQuery(query.id, { text, show_alert: true });
         }
         catch {
             return global.bot.answerCallbackQuery(query.id, { text: global.polyglot.t('round.poll.notFound') });
         }
-    }
-
-
-    const getCheckBotChatReplyMarkup = async () => {
-        return {
-            inline_keyboard: [[{ text: global.polyglot.t('round.group.checkBotChat'), url: `https://t.me/${(await global.bot.getMe()).username}` }]]
-        } as InlineKeyboardMarkup;
-    }
-
-    const getPollMessage = async (chatId: number, solution: boolean = false) => {
-        const [ definitions, word, leaderId, votes ] = await Promise.all([
-            Model.getDefinitions(chatId),
-            Model.getWord(chatId),
-            Model.getCurrentPlayer(chatId),
-            Model.getVotes(chatId),
-        ]) 
-
-        let text = global.polyglot.t('round.poll.header', { word });
-        for (const i in definitions) {
-            text += `\n*${Number(i) + 1}.* `;
-            if (solution) {
-                text += definitions[i].userId === leaderId ? '✔️ ' : '❌ ';
-            }
-            
-            text += `${ definitions[i].definition }`;
-            if (solution) {
-                const label = Utils.getUserLabel((await global.bot.getChatMember(chatId, definitions[i].userId)).user);
-                const nVotes = votes.find((el) => el.userId === definitions[i].userId)?.votes.length ?? 0;
-                text += ` - ${ label } (${ nVotes })`;
-            }
-        }
-
-        if (!solution) {
-            const missingPlayers = await Model.getMissingPlayers(chatId);
-            text += `\n\n${global.polyglot.t('round.group.voteMissing', {
-                missingPlayers: await getPlayersString(chatId, missingPlayers),
-                smart_count: missingPlayers.length,
-            })}`;
-        } else {
-            text += `\n\n${global.polyglot.t('round.group.checkVoteButtons')}`;
-        }
-
-        return text;
-    }
-
-    const getPollKeyboard = async (chatId: number) => {
-        const definitions = await Model.getDefinitions(chatId);
-
-        const keyboard: InlineKeyboardButton[][] = [];
-        for (let i = 0; i < definitions.length; i++) {
-            if (i % Constants.MAX_BUTTONS_IN_ROW === 0) {
-                keyboard.push([]);
-            }
-            keyboard[keyboard.length - 1].push({ text: String(i + 1), callback_data: `poll:${definitions[i].userId}` })
-        }
-
-        return keyboard;
-    }
-
-    const getPlayersString = async (chatId: number, userIds: number[], mentions: boolean = true) => {
-        const members = await Promise.all(userIds.map(((userId) => global.bot.getChatMember(chatId, userId))));
-        const missingPlayers = members.map((member) => Utils.getUserLabel(member.user, mentions));
-        return missingPlayers.join(', ');
     }
 
 }

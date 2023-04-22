@@ -3,7 +3,7 @@ import TelegramBot, { CallbackQuery, Message } from "node-telegram-bot-api";
 import { Model } from "../model/Model"
 import { Status } from "../model/Game"
 import { RoundController } from "./RoundController";
-import { Utils } from "./Utils";
+import { TextUtils } from "../TextUtils";
 import Constants from "../constants";
 
 export namespace PreparationController {
@@ -20,8 +20,8 @@ export namespace PreparationController {
             await Model.initGame(chatId);
             const message = await global.bot.sendMessage(
                 chatId,
-                await getJoinMessage(msg),
-                { reply_markup: await getJoinKeyboard(msg), parse_mode: 'Markdown' }
+                await TextUtils.getJoinMessage(chatId),
+                { reply_markup: await getJoinKeyboard(msg), parse_mode: 'HTML' }
             )
             await Model.setStartMessageId(chatId, message.message_id);
         }
@@ -44,12 +44,15 @@ export namespace PreparationController {
         }
 
         if (await Model.addPlayer(query.message.chat.id, query.from.id)) {
-            const messageKey = { chat_id: query.message.chat.id, message_id: query.message.message_id }
+            const chatId = query.message.chat.id;
             const replyMarkup = await getJoinKeyboard(query.message);
-            await global.bot.editMessageText(await getJoinMessage(query.message), { reply_markup: replyMarkup, ...messageKey, parse_mode: 'Markdown' });
+            await global.bot.editMessageText(
+                await TextUtils.getJoinMessage(chatId),
+                { reply_markup: replyMarkup, chat_id: chatId, message_id: query.message.message_id, parse_mode: 'HTML' }
+            );
 
             // When maximum nuber of players is reached start first round
-            if ((await Model.numberOfPlayers(query.message.chat.id)) >= Constants.MAX_PLAYERS) {
+            if ((await Model.numberOfPlayers(chatId)) >= Constants.MAX_PLAYERS) {
                 await RoundController.startGame(query);
             }
         }
@@ -64,10 +67,13 @@ export namespace PreparationController {
         if (!query.message?.chat.id || !query.message.from?.id) {
             throw 'Invalid query';
         }
-        if (await Model.removePlayer(query.message.chat.id, query.from?.id)) {
-            const messageKey = { chat_id: query.message.chat.id, message_id: query.message.message_id }
+        const chatId = query.message.chat.id;
+        if (await Model.removePlayer(chatId, query.from?.id)) {
             const replyMarkup = await getJoinKeyboard(query.message);
-            await global.bot.editMessageText(await getJoinMessage(query.message), { reply_markup: replyMarkup, ...messageKey, parse_mode: 'Markdown'});
+            await global.bot.editMessageText(
+                await TextUtils.getJoinMessage(chatId),
+                { reply_markup: replyMarkup, chat_id: chatId, message_id: query.message.message_id, parse_mode: 'HTML'}
+            );
         }
         else {
             await global.bot.answerCallbackQuery(query.id, { text: global.polyglot.t('prepare.notJoined') });
@@ -97,19 +103,6 @@ export namespace PreparationController {
         }
 
         return keyboard;
-    }
-
-
-    // Auxiliary method to get preparation message
-    const getJoinMessage = async (msg: Message) => {
-        let message = global.polyglot.t('prepare.start', { minPlayers: Constants.MIN_PLAYERS, maxPlayers: Constants.MAX_PLAYERS });
-        const playerIds = await Model.getPlayers(msg.chat.id);
-        const members = await Promise.all(playerIds.map(((userId) => global.bot.getChatMember(msg.chat.id, userId))));
-        const playerNames = members.map(((member) => Utils.getUserLabel(member.user)));
-        if (playerNames.length) {
-            message += `\n\n${global.polyglot.t('prepare.playersAlreadyJoined', { playersList: playerNames.join(', '), smart_count: members.length })}`;
-        }
-        return message;
     }
 
 }
