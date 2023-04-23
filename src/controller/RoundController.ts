@@ -251,8 +251,12 @@ export namespace RoundController {
         if (query.from.id === vote && process.env.VERCEL_ENV !== 'development') {
             return global.bot.answerCallbackQuery(query.id, { text: global.polyglot.t('round.poll.autoVote'), show_alert: true })
         }
-        await global.bot.answerCallbackQuery(query.id, { text: global.polyglot.t('round.poll.voteRegistered') })
-        await Model.addVote(chatId, query.from.id, vote);
+        const updated = await Model.addVote(chatId, query.from.id, vote);
+        if (updated) {
+            await global.bot.answerCallbackQuery(query.id, { text: global.polyglot.t('round.poll.voteUpdated') })
+        } else {
+            await global.bot.answerCallbackQuery(query.id, { text: global.polyglot.t('round.poll.voteRegistered') })
+        }
 
         if ((await Model.numberOfVotes(chatId)) >= (await Model.numberOfPlayers(chatId)) - 1) {
             // close poll
@@ -290,7 +294,7 @@ export namespace RoundController {
             // start new round
             await Model.archiveCurrentRound(chatId);
             setTimeout(() => newRound(chatId), Constants.NEXT_ROUND_WAIT);
-        } else {
+        } else if (!updated) {
             // only update message
             const [ text, keyboard ] = await Promise.all([
                 await TextUtils.getPollMessage(chatId),
