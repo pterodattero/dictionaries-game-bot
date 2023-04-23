@@ -1,4 +1,5 @@
 {
+    "conjunction": "e",
     "start": {
         "error": "Per favore usa questo comando in un gruppo per giocare",
         "noGame": "Nessun gioco è in corso in questa chat",

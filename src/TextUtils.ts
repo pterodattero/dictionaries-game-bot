@@ -76,17 +76,16 @@ export namespace TextUtils {
     export const getPlayersString = async (chatId: number, userIds: number[], mentions: boolean = true) => {
         const members = await Promise.all(userIds.map(((userId) => global.bot.getChatMember(chatId, userId))));
         const missingPlayers = members.map((member) => getUserLabel(member.user, mentions));
-        return missingPlayers.join(', ');
+        const conjunction = global.polyglot.t('conjunction');
+        return [...missingPlayers.slice(0, -2), missingPlayers.slice(-2).join(` ${conjunction} `)].join(', ');
     }
 
     // Auxiliary method to get preparation message
     export const getJoinMessage = async (chatId: number) => {
         let message = global.polyglot.t('prepare.start', { minPlayers: Constants.MIN_PLAYERS, maxPlayers: Constants.MAX_PLAYERS });
         const playerIds = await Model.getPlayers(chatId);
-        const members = await Promise.all(playerIds.map(((userId) => global.bot.getChatMember(chatId, userId))));
-        const playerNames = members.map(((member) => getUserLabel(member.user)));
-        if (playerNames.length) {
-            message += `\n\n<i>${global.polyglot.t('prepare.playersAlreadyJoined', { playersList: playerNames.join(', '), smart_count: members.length })}</i>`;
+        if (playerIds.length) {
+            message += `\n\n<i>${global.polyglot.t('prepare.playersAlreadyJoined', { playersList: await getPlayersString(chatId, playerIds), smart_count: playerIds.length })}</i>`;
         }
         return message;
     }
