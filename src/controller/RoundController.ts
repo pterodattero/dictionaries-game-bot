@@ -293,7 +293,12 @@ export namespace RoundController {
 
             // start new round
             await Model.archiveCurrentRound(chatId);
-            setTimeout(() => newRound(chatId), Constants.NEXT_ROUND_WAIT);
+            return new Promise((resolve, reject) => {
+                setTimeout(
+                    () => newRound(chatId).then(resolve).catch(reject),
+                    Constants.NEXT_ROUND_WAIT
+                );
+            })
         } else if (!updated) {
             // only update message
             const [ text, keyboard ] = await Promise.all([
