@@ -1,4 +1,5 @@
 {
+    "conjunction": "and",
     "start": {
         "error": "Please use this command in a group chat to play.",
         "noGame": "No game is going on in this chat.",
