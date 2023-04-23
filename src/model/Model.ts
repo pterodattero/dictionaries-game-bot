@@ -238,11 +238,13 @@ export namespace Model {
     }
 
     // Vote methods
-    export async function addVote(chatId: number, userId: number, vote: number): Promise<void> {
+    export async function addVote(chatId: number, userId: number, vote: number): Promise<boolean> {
         const game = await getGame(chatId);
         const playerIndex = game.players.findIndex((player) => player.userId === userId);
+        const updated = !!game.players[playerIndex].vote;
         game.players[playerIndex].vote = vote;
         await game.save();
+        return updated;
     }
 
     export async function getVotes(chatId: number) {
