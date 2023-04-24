@@ -12,7 +12,7 @@ export namespace CommandController {
         if (!(await Model.isChatInitialized(msg.chat.id))) {
             return LanguageController.languageCommand(msg, 'start');
         }
-        if (msg.chat.type !== "group") {
+        if (msg.chat.type !== 'group' && msg.chat.type !== 'supergroup') {
             return global.bot.sendMessage(msg.chat.id, global.polyglot.t('start.error'));
         }
         else {
@@ -22,7 +22,7 @@ export namespace CommandController {
 
     export const stopCommand = async (msg: Message) => {
         const chatId = msg.chat.id;
-        if (msg.chat.type !== 'group') {
+        if (msg.chat.type !== 'group' && msg.chat.type !== 'supergroup') {
             await global.bot.sendMessage(chatId, global.polyglot.t('command.stopInGroup'));
         }
         else if (await Model.getGameStatus(chatId) !== Status.STOPPED) {

@@ -35,7 +35,7 @@ export namespace LanguageController {
             await Model.setLanguange(chatId, language);
             await global.bot.answerCallbackQuery(query.id);
             await I18n.init(language);
-            const isGroup = query.message?.chat.type === 'group';
+            const isGroup = query.message?.chat.type === 'group' || query.message?.chat.type === 'supergroup';
             await global.bot.editMessageText(
                 global.polyglot.t(isGroup ? 'language.doneGroup' : 'language.donePrivate'),
                 { chat_id: chatId, message_id: query.message?.message_id }
