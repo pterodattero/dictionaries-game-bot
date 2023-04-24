@@ -1,6 +1,4 @@
-import TelegramBot, { CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Message, PollAnswer } from "node-telegram-bot-api";
-import Fs from 'fs/promises';
-import Path from 'path';
+import { CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Message, PollAnswer } from "node-telegram-bot-api";
 
 import { Model } from "../model/Model"
 import { Status } from "../model/Game";
@@ -48,15 +46,14 @@ export namespace RoundController {
             );
 
             // Contact privately the leader
-            const language = await Model.getLanguange(chatId);
-            const resources: { text: string, url: string }[] = JSON.parse((await Fs.readFile(Path.resolve(__dirname, '../i18n', `resources.${language}.json`))).toString());
             const chatTitle = (await global.bot.getChat(chatId)).title ?? '';
+            const keyboard = await TextUtils.getResourcesKeyboard(chatId);
             const message = await global.bot.sendMessage(
                 leader.id,
                 global.polyglot.t('round.leader.word', { chat: TextUtils.escapeHtml(chatTitle) }),
                 {
                     reply_markup: {
-                        inline_keyboard: [resources],
+                        inline_keyboard: keyboard,
                     }
                 }
             );

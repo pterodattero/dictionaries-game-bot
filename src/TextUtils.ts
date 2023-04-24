@@ -1,4 +1,6 @@
 import { InlineKeyboardButton, InlineKeyboardMarkup, User } from "node-telegram-bot-api";
+import Fs from 'fs/promises';
+import Path from 'path';
 
 import { Model } from "./model/Model";
 import Constants from "./constants";
@@ -88,6 +90,20 @@ export namespace TextUtils {
             message += `\n\n<i>${global.polyglot.t('prepare.playersAlreadyJoined', { playersList: await getPlayersString(chatId, playerIds), smart_count: playerIds.length })}</i>`;
         }
         return message;
+    }
+
+    export const getResourcesKeyboard = async (chatId: number) => {
+        const BUTTONS_IN_ROW = 2;
+        const language = await Model.getLanguange(chatId);
+        const resources: { text: string, url: string }[] = JSON.parse((await Fs.readFile(Path.resolve(__dirname, './i18n', `resources.${language}.json`))).toString());
+        const keyboard: InlineKeyboardButton[][] = [];
+        for (const i in resources) {
+            if (Number(i) % BUTTONS_IN_ROW === 0) {
+                keyboard.push([]);
+            }
+            keyboard[keyboard.length - 1].push(resources[i]);
+        }
+        return keyboard;
     }
 
     export const escapeHtml = (text: string) => {
