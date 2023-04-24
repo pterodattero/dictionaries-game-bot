@@ -1,6 +1,6 @@
 {
   "name": "dictionaries-game-bot",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A Telegram bot written in Node.js to play dictionaries game.",
   "main": "index.js",
   "scripts": {
