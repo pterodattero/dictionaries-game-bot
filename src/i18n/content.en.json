@@ -35,7 +35,7 @@
             "checkBotChat": "Go to private chat"
         },
         "leader": {
-            "word": "It is your turn to pick a word for chat %{chat}! Reply to this message with your choice.",
+            "word": "It is your turn to pick a word for chat %{chat}! Reply to this message with your word.",
             "definition": "Perfect. Now reply to this message the correct definition of '%{word}'."
         },
         "player": {
