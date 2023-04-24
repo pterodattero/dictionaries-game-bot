@@ -1,28 +1,20 @@
 import mongoose from "mongoose";
-import Game, { IGame, Status } from "./models/Game";
-import MessageInteraction from "./models/MessageInteraction";
-import PollInteraction from "./models/PollInteraction";
-import Settings from "./models/Settings";
+
+import Constants from "../constants";
+import Game, { IGame, Status } from "./Game";
+import MessageInteraction from "./MessageInteraction";
+import Rounds from "./Rounds";
+import Settings from "./Settings";
 
 
-
-export namespace Controller {
-    // constants
-    export const MIN_PLAYERS = 4;
-    export const MAX_PLAYERS = 10;
-
-    export const VOTE_POINTS = 1;
-    export const GUESS_POINTS = 3;
-    export const EVERYONE_GUESSED_POINTS = 2;
-    export const NOT_EVERYONE_GUESSED_LEADER_POINTS = 3;
-    export const EVERYONE_GUESSED_LEADER_POINTS = 0;
+export namespace Model {
 
     // general DB methods
     export async function connect() {
         if (!process.env.MONGODB_URI)
             throw "Invalid MONGODB_URI environment variable"
         console.log("Connecting to MongoDB...");
-        await mongoose.connect(process.env.MONGODB_URI, { dbName: process.env.DB_NAME ?? process.env.NODE_ENV });
+        await mongoose.connect(process.env.MONGODB_URI, { dbName: process.env.DB_NAME ?? process.env.VERCEL_ENV });
         console.log("Connected");
     }
 
@@ -34,47 +26,43 @@ export namespace Controller {
         return result?.language ?? 'en';
     }
 
+    export async function isChatInitialized(chatId: number) {
+        return !!await Settings.findOne({ chatId });
+    }
+
     export async function setLanguange(chatId: number, language: string) {
         await Settings.replaceOne({ chatId }, { chatId, language }, { upsert: true });
     }
 
     // Interaction methods
-    export async function setMessageInteraction(messageId: number, userId: number, chatId: number, groupMessageId: number): Promise<void> {
-        await MessageInteraction.create({ messageId, userId, chatId, groupMessageId });
+    export async function setMessageInteraction(userId: number, messageId: number, chatId: number, groupMessageId: number): Promise<void> {
+        await MessageInteraction.create({ userId, messageId, chatId, groupMessageId });
     }
 
-    export async function unsetMessageInteraction(messageId: number, userId: number): Promise<void> {
-        if (await getMessageInteraction(messageId, userId))
-            await MessageInteraction.deleteOne({ messageId, userId })
+    export async function unsetMessageInteraction(userId: number, messageId?: number): Promise<void> {
+        if (await getMessageInteraction(userId, messageId))
+            await MessageInteraction.deleteOne(messageId ? { userId, messageId } : { userId });
     }
 
-    export async function getMessageInteraction(messageId: number, userId: number): Promise<{ chatId: number, groupMessageId: number } | undefined> {
-        const interaction = await MessageInteraction.findOne({ messageId, userId });
-        if (interaction)
-            return {
-                chatId: interaction.chatId,
-                groupMessageId: interaction.groupMessageId,
-            }
+    export async function cleanMessageInteractions(chatId: number) {
+        await MessageInteraction.deleteMany({ chatId });
     }
 
-    export async function setPollInteraction(pollId: string, chatId: number, messageId: number): Promise<void> {
-        await PollInteraction.create({ pollId, chatId, messageId });
-    }
+    export async function getMessageInteraction(userId: number, messageId?: number): Promise<{ chatId: number, groupMessageId: number } | undefined> {
+        if (!messageId && await MessageInteraction.countDocuments({ userId }) > 1) {
+            return;
+        }
+        const interaction = await MessageInteraction.findOne(messageId ? { userId, messageId } : { userId });
+        if (!interaction) {
+            throw "Interaction not found";
+        }
 
-    export async function unsetPollInteraction(pollId: string): Promise<void> {
-        if (await getPollInteraction(pollId))
-            PollInteraction.deleteOne({ pollId });
-    }
-
-    export async function getPollInteraction(pollId: string): Promise<{ chatId: number, messageId: number } | undefined> {
-        const interaction = await PollInteraction.findOne({ pollId });
-        if (interaction) {
-            return {
-                chatId: interaction.chatId,
-                messageId: interaction.messageId,
-            };
+        return {
+            chatId: interaction.chatId,
+            groupMessageId: interaction.groupMessageId,
         }
     }
+
 
     // Game methods
     export async function initGame(chatId: number): Promise<void> {
@@ -89,19 +77,20 @@ export namespace Controller {
         return game;
     }
 
-    export async function getGameStatus(chatId: number): Promise<Status> {
-        let game;
+    export async function getGameStatus(chatId: number) {
         try {
-            game = await getGame(chatId);
+            const game = await getGame(chatId);
+            return game.status;
         }
-        catch (err) {
+        catch {
             return Status.STOPPED;
         }
-        return game?.status;
     }
 
-    export async function setGameStatus(chatId: number, status: Status): Promise<void> {
-        await Game.findOneAndUpdate({ chatId }, { status });
+    export async function setGameStatus(chatId: number, status: Status) {
+        const game = await getGame(chatId);
+        game.status = status;
+        await game.save();
     }
 
     // Player methods
@@ -155,8 +144,15 @@ export namespace Controller {
         return game.round;
     }
 
-    export async function newRound(chatId: number): Promise<boolean> {
+    export async function getLap(chatId: number): Promise<number | undefined> {
         const game = await getGame(chatId);
+        return game.lap;
+    }
+
+    export async function initRound(chatId: number): Promise<boolean> {
+        const game = await getGame(chatId);
+        game.pollMessageId = undefined;
+        game.lapEndMessageId = undefined;
 
         for (const player of game.players) {
             player.definition = undefined;
@@ -165,14 +161,20 @@ export namespace Controller {
 
         game.word = undefined;
 
-        if (game.round === undefined)
+        if (game.round === undefined) {
             game.round = 0;
-        else
+            if (game.lap === undefined) {
+                game.lap = 0;
+            } else {
+                game.lap += 1;
+            }
+        }
+        else {
             game.round += 1;
+        }
 
         if (game.round === await numberOfPlayers(chatId)) {
             game.round = undefined;
-            game.status = Status.STOPPED;
             await game.save();
             return false;
         }
@@ -200,11 +202,11 @@ export namespace Controller {
         await game.save();
     }
 
-    export async function getDefinitions(chatId: number): Promise<string[]> {
+    export async function getDefinitions(chatId: number): Promise<{ userId: number, definition: string }[]> {
         const game = await getGame(chatId);
         if (!game.indexes)
             throw Error('Indexes not initialized');
-        return game.indexes.map((index) => game.players[index].definition ?? '');
+        return game.indexes.map((index) => ({ userId: game.players[index].userId, definition: game.players[index].definition ?? '' }));
     }
 
     export async function numberOfDefinitions(chatId: number): Promise<number> {
@@ -212,11 +214,8 @@ export namespace Controller {
         return game.players.filter((player) => player.definition).length;
     }
 
-    export async function shuffleDefinitions(chatId: number): Promise<number> {
+    export async function shuffleDefinitions(chatId: number) {
         const game = await getGame(chatId);
-        if (game.round === undefined)
-            throw Error('No round in act');
-
         const indexes = [...Array(await numberOfPlayers(chatId)).keys()];
         for (let i = indexes.length - 1; i > 0; i--) {
             let j = Math.floor(Math.random() * (i + 1));
@@ -225,7 +224,6 @@ export namespace Controller {
 
         game.indexes = indexes;
         await game.save();
-        return indexes.indexOf(game.round);
     }
 
     export async function getMissingPlayers(chatId: number): Promise<number[]> {
@@ -233,21 +231,31 @@ export namespace Controller {
         if (game.round === undefined)
             throw Error('No round in act');
 
+        const leaderId = await getCurrentPlayer(chatId);
         return game.players
-            .filter((playerData) => !playerData.definition)
+            .filter((playerData) => (game.status === Status.ANSWER) ? !playerData.definition : (!playerData.vote && playerData.userId !== leaderId))
             .map((playerData) => playerData.userId);
     }
 
     // Vote methods
-    export async function addVote(chatId: number, userId: number, index: number): Promise<void> {
+    export async function addVote(chatId: number, userId: number, vote: number): Promise<boolean> {
         const game = await getGame(chatId);
-        if (!game.indexes)
-            throw Error('Invalid game');
-
         const playerIndex = game.players.findIndex((player) => player.userId === userId);
-
-        game.players[playerIndex].vote = game.players[game.indexes.indexOf(index)].userId;
+        const updated = !!game.players[playerIndex].vote;
+        game.players[playerIndex].vote = vote;
         await game.save();
+        return updated;
+    }
+
+    export async function getVotes(chatId: number) {
+        const game = await getGame(chatId);
+        return game.players.map((playerData) => {
+            const votes = game.players.filter((el) => el.vote === playerData.userId).map((el) => el.userId);
+            return {
+                userId: playerData.userId,
+                votes,
+            }
+        })
     }
 
     export async function numberOfVotes(chatId: number): Promise<number> {
@@ -270,16 +278,16 @@ export namespace Controller {
         // Guess points
         for (const player of game.players) {
             if (player.userId === leaderId) {
-                roundPoints[player.userId] += everyoneGuessed ? NOT_EVERYONE_GUESSED_LEADER_POINTS : EVERYONE_GUESSED_LEADER_POINTS;
-            } else {
-                roundPoints[player.userId] += everyoneGuessed ? EVERYONE_GUESSED_POINTS : GUESS_POINTS;
+                roundPoints[player.userId] += everyoneGuessed ? Constants.EVERYONE_GUESSED_LEADER_POINTS : Constants.NOT_EVERYONE_GUESSED_LEADER_POINTS;
+            } else if (player.vote === leaderId) {
+                roundPoints[player.userId] += everyoneGuessed ? Constants.EVERYONE_GUESSED_POINTS : Constants.GUESS_POINTS;
             }
         }
 
         // Vote points
         for (const player of game.players) {
             if (player.vote && player.vote !== player.userId && player.vote !== leaderId) {
-                roundPoints[player.vote] += VOTE_POINTS;
+                roundPoints[player.vote] += Constants.VOTE_POINTS;
             }
         }
 
@@ -300,5 +308,67 @@ export namespace Controller {
             game.players[i].score += roundPoints[game.players[i].userId];
         }
         await game.save();
+    }
+
+
+    // message ID methods
+    export async function setStartMessageId(chatId: number, messageId?: number) {
+        const game = await getGame(chatId);
+        game.startMessageId = messageId;
+        await game.save();
+    }    
+
+    export async function getStartMessageId(chatId: number) {
+        const game = await getGame(chatId);
+        return game.startMessageId;
+    }    
+
+    export async function setPollMessageId(chatId: number, messageId: number) {
+        const game = await getGame(chatId);
+        game.pollMessageId = messageId;
+        await game.save();
+    }    
+
+    export async function getPollMessageId(chatId: number) {
+        const game = await getGame(chatId);
+        return game.pollMessageId;
+    }    
+
+    export async function setLapEndMessageId(chatId: number, messageId?: number) {
+        const game = await getGame(chatId);
+        game.lapEndMessageId = messageId;
+        await game.save();
+    }    
+
+    export async function getLapEndMessageId(chatId: number) {
+        const game = await getGame(chatId);
+        return game.lapEndMessageId;
+    }    
+
+
+    // archive methods
+    export async function archiveCurrentRound(chatId: number) {
+        const game = await getGame(chatId);
+        const userVotes: { [userId: number]: number[]} = {};
+        for (const playerData of game.players) {
+            if (playerData.vote) {
+                userVotes[playerData.vote] ??= [];
+                userVotes[playerData.vote].push(playerData.userId);
+            }
+        }
+        await Rounds.create({
+            chatId,
+            startMessageId: game.startMessageId,
+            pollMessageId: game.pollMessageId,
+            votes: Object.entries(userVotes).map(([ userId, votes ]) => ({ userId, votes })),
+        });
+    }
+
+    export async function getRoundVotes(chatId: number, pollMessageId: number) {
+        const round = await Rounds.findOne({ chatId, pollMessageId });
+        if (!round) {
+            throw 'Round not found';
+        }
+        return round.votes;
     }
 }

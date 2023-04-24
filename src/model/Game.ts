@@ -21,8 +21,12 @@ export interface IGame {
     players: Types.Array<IPlayer>,
     status: Status,
     round?: number,
+    lap?: number,
     word?: string,
-    indexes: number[],
+    indexes: number[], // index map: pollPosition -> playerIndex
+    startMessageId?: number,
+    pollMessageId?: number,
+    lapEndMessageId?: number,
 }
 
 const PlayerSchema = new Schema<IPlayer>({
@@ -37,8 +41,12 @@ const GameSchema = new Schema<IGame>({
     players: [PlayerSchema],
     status: { type: String, default: Status.STOPPED },
     round: Number,
+    lap: Number,
     word: String,
     indexes: [Number],
+    startMessageId: Number,
+    pollMessageId: Number,
+    lapEndMessageId: Number,
 })
 
 export default model('Game', GameSchema);

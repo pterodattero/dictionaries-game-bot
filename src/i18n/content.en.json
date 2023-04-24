@@ -1,17 +1,25 @@
 {
+    "conjunction": "and",
+    "start": {
+        "error": "Please use this command in a group chat to play.",
+        "noGame": "No game is going on in this chat.",
+        "welcome": "You have authorized me to PM with you. If you want to join a game that has already started just go back to group chat and now you can tap <i>Join</i>. If you want to start a game with your friends add me to your group chat and use /start command."
+    },
     "prepare": {
-        "start": "Heads up, time to join! Between %{minPlayers} and %{maxPlayers} are required to play. If you haven't allowed PM yet you have to do it now. Once everyone who wants to play has joined, press the continue button to start.",
-        "playersAlreadyJoined": "%{playersList} already joined.",
+        "start": "Heads up, time to join! Between %{minPlayers} and %{maxPlayers} are required to play. If you haven't authorized PM yet you have to do it now. Once everyone who wants to play has joined, press the <i>Play</i> button to start.",
+        "playersAlreadyJoined": "%{playersList} has already joined. |||| %{playersList} have already joined.",
         "refuse": "A game is already going on in this chat.",
         "interactionTry": "Trying to interact with you...",
-        "interactionError": "Please register before joining",
+        "interactionError": "Please authorize PM before joining. You have to do it only once.",
         "alreadyJoined": "You have already joined",
         "notJoined": "You haven't joined yet",
         "keyboard": {
             "join": "Join (%{availableSlots})",
             "withdraw": "Withdraw",
-            "continue": "Play",
-            "register": "Register for PM"
+            "continue": "Start",
+            "register": "Authorize PM",
+            "testVersionError": "You're using an experimental version, developer must partecipate to the game.",
+            "inactive": "This message is not valid anymore"
         },
         "gameStarted": "Game started!",
         "nonJoinedContinue": "You have to join to start a game"
@@ -19,41 +27,58 @@
     "round": {
         "group": {
             "round": "Round %{round}/%{totalRounds}",
-            "word": "%{leader} has to pick a word.",
-            "definition": "%{missingPlayers} still have to enter their definition.",
-            "end": "%{leader} is the leader"
+            "word": "%{leader} has to pick a word. I'll text you in PM when she's done.",
+            "definition": "%{missingPlayers} has to enter her definition. |||| %{missingPlayers} have to enter their definition.",
+            "voteMissing": "%{missingPlayers} has to enter her vote. |||| %{missingPlayers} have to enter their vote.",
+            "checkVoteButtons": "Click on the buttons below to know who voted each definition",
+            "end": "%{leader} is the leader",
+            "checkBotChat": "Go to private chat"
         },
         "leader": {
-            "word": "It is your turn to pick a word for chat %{chat}! Reply to this message with your choice.",
-            "definition": "Perfect. Now reply to this message the correct definition of %{word}."
+            "word": "It is your turn to pick a word for chat %{chat}! Reply to this message with your word.",
+            "definition": "Perfect. Now reply to this message the correct definition of '%{word}'."
         },
         "player": {
-            "definition": "%{leader} chose the word %{word} for this round. Now reply to this message your fake definition."
+            "definition": "%{leader} chose the word '%{word}' for this round. Now reply to this message your fake definition."
         },
         "end": "Got it! You can go back to group chat and wait for other players to enter their definition.",
-        "checkGroup": "Check group chat", 
+        "checkGroup": "Go to group chat", 
         "maxLength":  "max %{maxLength} characters",
         "tooLongWordError": "A word can be at most %{maxLength} long.",
         "tooLongDefinitionError": "A definition can be at most %{maxLength} long.",
-        "poll": "Which is the correct definition of %{word}?",
-        "pollIntermission": "You're not playing in this game, so your vote won't be considered.",
         "scoreboard": "Scoreboard:",
-        "invalidInteraction": "Sorry, this message is not active anymore."
+        "poll": {
+            "header": "Which is the correct definition of '%{word}'?",
+            "intermission": "You're not playing in this game, so your vote won't be considered",
+            "leaderIntermission": "You're not playing in this round, so your vote won't be considered",
+            "autoVote": "You can't vote for yourself",
+            "voteRegistered": "Vote registered. You can change it before everyone has voted",
+            "voteUpdated": "Vote updated",
+            "invalidButton": "Invalid button",
+            "notFound": "I'm having some troubles in fetching data...",
+            "votedBy": "Voted by: %{players}",
+            "noVotes": "No one voted for this definition"
+        },
+        "lapEnd": {
+            "message": "Lap finished. Do you want to keep playing or to see the final results?",
+            "end": "Final results",
+            "continue": "Keep playing",
+            "newLap": "New lap started!"
+        }
     },
+    "invalidInteraction": "What?",
     "end": "Game finished!",
-    "replyAlert": "If you want to interact with me please reply to my messages (swipe left)",
-    "help": "The leader of the game will select an odd, unusual word from the dictionary. The goal is to select a word that no one has ever heard of before, and that the meaning would be really hard to guess. While the leader writes the correct definition, each player writes down a fake but credible definition for it. Next, the bot sends a poll with the shuffled definitions without specifying the author. The players have to vote on which one they think is the real definition.\nPoints:\n - players get %{guessPoints} pt. for guessing the correct definition, but if everyone guesses she gets %{everyoneGuessedPoints}\n - if everyone guesses correctly, the leader gets %{everyoneGuessedLeaderPoints} pt. \n - otherwise she gets %{notEveryoneGuessedLeaderPoints} pt. \n - furthermore, players get %{votePoints} pt. for every received vote \nAfter everyone has had a turn as leader, the person who has scored the most points wins!",
-    "resources": "Check these out:",
+    "replyAlert": "If you are playing in more that one game simultaneously you have to reply to my messages to avoid ambiguity (i.e. swipe left on my messages)",
+    "help": "The leader of the game will select an odd, unusual word from the dictionary. The goal is to select a word that no one has ever heard of before, and that the meaning would be really hard to guess. While the leader writes the correct definition, each player writes down a fake but credible definition for it. Next, the bot sends a poll with the shuffled definitions without specifying the author. The players have to vote on which one they think is the real definition.\nPoints:\n - players get %{guessPoints} pt. for guessing the correct definition, but if everyone guesses she gets %{everyoneGuessedPoints}\n - if everyone guesses correctly, the leader gets %{everyoneGuessedLeaderPoints} pt. \n - otherwise she gets %{notEveryoneGuessedLeaderPoints} pt. \n - furthermore, players get %{votePoints} pt. for every received vote \nWho gets most points wins!",
     "language": {
-        "selectGroup": "Select the language that you want to use in this chat and in related private messages",
-        "selectPrivate": "Select the language that you want to use with game unrelated interactions with me",
-        "done": "Language set to English"
+        "select": "Select the language.",
+        "doneGroup": "Language set to English for this group. Also private messages related to this group will be in this language. If you want to change language also in game independent PMs use /language command in bot chat.",
+        "donePrivate": "Language set to English. This settings does not affect language used in games, which has to be set in the corresponding group with /language command."
     },
-    "about": "This project is open source. Check it out on [GitHub](https://github.com/pterodattero/dictionaries-game-bot)",
-    "donate": "I don't feel ready yet for asking real money, but I appreciate your intent ❤️",
+    "about": "This project is open source. If you want to contribute with proposals, issue reports, new features or translations take a look at <a href=\"https://github.com/pterodattero/dictionaries-game-bot\">this repository</a>. If you enjoyed playing consider a donation with /donate command.",
+    "donate": "Support the developer! This project is not made for profict, but financial support is appreciated ❤️",
     "command": {
-        "startError": "Please add me to a group chat to play",
-        "startNoGame": "No game is going on in this chat",
-        "stop": "Game stopped"
+        "stop": "Game stopped.",
+        "stopInGroup": "This command can be used only in group chats."
     }
 }

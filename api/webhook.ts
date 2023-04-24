@@ -2,9 +2,8 @@
 // Fixes an error with Promise cancellation
 process.env.NTBA_FIX_319 = 'test';
 
-import '../dist/bot';
-import { Controller } from '../dist/controller';
-import handleUpdate from '../dist/handler';
+import { initApp } from '../dist';
+import handleUpdate from '../dist/controller/Controller';
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { Update } from 'node-telegram-bot-api';
 
@@ -16,7 +15,7 @@ export default async function handler(request: VercelRequest, response: VercelRe
         }
 
         const update: Update = request.body;
-        await Controller.connect();
+        await initApp();
         
         if(global.bot === undefined) {
             throw Error("Bot undefined");

@@ -1,17 +1,25 @@
 {
+    "conjunction": "e",
+    "start": {
+        "error": "Per favore usa questo comando in un gruppo per giocare",
+        "noGame": "Nessun gioco è in corso in questa chat",
+        "welcome": "Mi hai autorizzato a scriverti in privato. Se vuoi aderire ad un gioco già in corso torna nel gruppo e ora puoi premere <i>Partecipa</i>. Se vuoi avviare un gioco con i tuoi amici aggiungimi al vostro gruppo e usa il comando /start."
+    },
     "prepare": {
-        "start": "Attenzione, è tempo di farsi avanti! Sono richiesti da %{minPlayers} a %{maxPlayers} giocatori per giocare. Se non mi hai già autorizzato a scriverti in privato è il momento di farlo. Quando tutti gli interessati hanno aderito, premere il bottone Continua per iniziare.",
-        "playersAlreadyJoined": "%{playersList} hanno già aderito.",
+        "start": "Attenzione, è tempo di farsi avanti! Sono richiesti da %{minPlayers} a %{maxPlayers} giocatori per giocare. Se non mi hai già autorizzato a scriverti in privato è il momento di farlo. Quando tutti gli interessati hanno aderito, premere il bottone <i>Inizia</i> per iniziare.",
+        "playersAlreadyJoined": "%{playersList} ha già aderito. |||| %{playersList} hanno già aderito.",
         "refuse": "Un gioco è già in corso in questa chat.",
         "interactionTry": "Provo a interagire con te...",
-        "interactionError": "Per favore autorizzami per partecipare",
+        "interactionError": "Autorizza PM e poi puoi partecipare. Dovrai farlo solo questa volta.",
         "alreadyJoined": "Hai già aderito",
         "notJoined": "Non hai ancora aderito",
         "keyboard": {
             "join": "Partecipa (%{availableSlots})",
             "withdraw": "Ritirati",
-            "continue": "Gioca",
-            "register": "Autorizza PM"
+            "continue": "Inizia",
+            "register": "Autorizza PM",
+            "testVersionError": "Stai usando una versione sperimentale del bot, lo sviluppatore deve partecipare al gioco.",
+            "inactive": "Questo messaggio non è più valido"
         },
         "gameStarted": "Gioco iniziato!",
         "nonJoinedContinue": "Devi partecipare per avviare il gioco"
@@ -19,44 +27,60 @@
     "round": {
         "group": {
             "round": "Turno %{round}/%{totalRounds}",
-            "word": "%{leader} deve scegliere una parola.",
-            "definition": "%{missingPlayers} devono ancora mandare la definizione.",
-            "end": "%{leader} è il narratore"
+            "word": "%{leader} deve scegliere una parola. Ti contatterò in privato quando avrà scelto.",
+            "definition": "%{missingPlayers} deve mandare la definizione. |||| %{missingPlayers} devono mandare la definizione.",
+            "voteMissing": "%{missingPlayers} deve votare. |||| %{missingPlayers} devono votare.",
+            "checkVoteButtons": "Premi i bottoni sotto per sapere chi ha votato ciascuna definizione",
+            "end": "%{leader} è il narratore.",
+            "checkBotChat": "Vai a chat privata"
         },
         "startMessage": "Turno %{round}/%{totalRounds}\n%{leader} deve scegliere una parola!",
         "leader": {
-            "word": "È il tuo turno per decidere una parola per la chat %{chat}! Rispondi a questo messaggio con la tua scelta.",
-            "definition": "Perfetto. Ora rispondi a questo messaggio con la definizione corretta di %{word}."
+            "word": "È il tuo turno per decidere una parola per la chat %{chat}! Rispondi a questo messaggio con il termine che hai scelto.",
+            "definition": "Perfetto. Ora rispondi a questo messaggio con la definizione corretta di '%{word}'."
         },
         "player": {
-            "definition": "%{leader} ha scelto la parola %{word} per questo turno. Ora rispondi a questo messaggio con la tua definizione fittizia."
+            "definition": "%{leader} ha scelto la parola '%{word}' per questo turno. Ora rispondi a questo messaggio con la tua definizione fittizia."
         },
         "end": "Ottimo! Puoi tornare nella chat di gruppo e aspettare che gli altri giocatori finiscano di dare la loro definizione.",
-        "checkGroup": "Controlla gruppo",
+        "checkGroup": "Vai a gruppo",
         "maxLength": "max %{maxLength} caratteri",
         "tooLongWordError": "Una parola può essere al massimo lunga %{maxLength} caratteri.",
         "tooLongDefinitionError": "Una definizione può essere al massimo lunga %{maxLength} caratteri.",
-        "poll": "Qual'è la definizione corretta di %{word}?",
-        "pollIntermission": "Non stai giocando in questo gioco, il tuo voto non sarà considerato",
         "scoreboard": "Punteggio:",
-        "invalidInteraction": "Mi dispiace, questo messaggio non è più attivo."
+        "poll": {
+            "header": "Qual'è la definizione corretta di '%{word}'?",
+            "intermission": "Non stai giocando in questo gioco, il tuo voto non sarà considerato",
+            "leaderIntermission": "Non stai giocando in questo turno, il tuo voto non sarà considerato",
+            "autoVote": "Non puoi autovotarti",
+            "voteRegistered": "Voto registrato. Puoi cambiarlo prima che tutti abbiano votato",
+            "voteUpdated": "Voto aggiornato",
+            "invalidButton": "Bottone non valido",
+            "notFound": "Sto avendo qualche problema a recuperare i dati...",
+            "votedBy": "Votata da: %{players}",
+            "noVotes": "Nessuno ha votato questa definizione"
+        },
+        "lapEnd": {
+            "message": "Giro finito. Volete continuare a giocare o vedere i risultati finali?",
+            "end": "Risultati",
+            "continue": "Continua",
+            "newLap": "Nuovo giro iniziato!"
+        }
     },
+    "invalidInteraction": "Cosa?",
     "end": "Gioco finito!",
-    "replyAlert": "Se vuoi interagire con me per favore rispondi ai miei messaggi (scorri a sinistra)",
-    "help": "Il narratore sceglie una parola strana, inusuale dal dizionario. L'obiettivo è scegliere una parola che nessuno ha mai sentito, e il cui significato è di difficile intuizione. Mentre il narratore inserisce la definizione corretta, ciascun giocatore inserisce una sua definizione fasulla ma credibile. Poi, il bot invia un sondaggio con le definizioni mischiate e anonime. I giocatori devono votare per quella che credono la definizione corretta.\nPunti:\n - i giocatori prendono %{guessPoints} pt. per aver indovinato la definizione corretta, ma se tutti indovinano prendono %{everyoneGuessedPoints}\n - se tutti indovinano, il narratore prende %{everyoneGuessedLeaderPoints} pt. \n - altrimenti prende %{notEveryoneGuessedLeaderPoints} pt. \n - inoltre, in giocatore prendono %{votePoints} pt. per ogni voto ricevuto \nDopo che tutti hanno giocato da narratore, chi ha più punti vince!",
+    "replyAlert": "Se stai giocando in più di un gioco alla volta devi rispondere ai miei messaggi per evitare ambiguità (i.e. trascina a sinistra i miei messaggi)",
+    "help": "Il narratore sceglie una parola strana, inusuale dal dizionario. L'obiettivo è scegliere una parola che nessuno ha mai sentito, e il cui significato è di difficile intuizione. Mentre il narratore inserisce la definizione corretta, ciascun giocatore inserisce una sua definizione fasulla ma credibile. Poi, il bot invia un sondaggio con le definizioni mischiate e anonime. I giocatori devono votare quella che credono la definizione corretta.\nPunti:\n - i giocatori prendono %{guessPoints} pt. per aver indovinato la definizione corretta, ma se tutti indovinano prendono %{everyoneGuessedPoints}\n - se tutti indovinano, il narratore prende %{everyoneGuessedLeaderPoints} pt. \n - altrimenti prende %{notEveryoneGuessedLeaderPoints} pt. \n - inoltre, i giocatori prendono %{votePoints} pt. per ogni voto ricevuto \nChi fa più punti vince!",
     "resources": "Ecco qualche risorsa:",
     "language": {
-        "selectGroup": "Seleziona il linguaggio da usare in questa chat e nei messaggi privati collegati",
-        "selectPrivate": "Seleziona il linguaggio da usare per le interazioni con me non collegate a giochi",
-        "noGroup": "Questo comando può essere usato solo nei gruppi",
-        "select": "",
-        "done": "Linguaggio impostato a italiano"
+        "select": "Seleziona la lingua.",
+        "doneGroup": "Lingua impostata a italiano. Anche i messaggi privati collegati a questo gruppo sarenno in questa lingua. Se vuoi cambiare il linguaggio anche nei messaggi privati non dipendenti dal gioco usa il comando /language nella chat con il bot.",
+        "donePrivate": "Lingua impostata a italiano. Questa impostazione non ha effetto sui messaggi relativi a giochi, per quelli deve essere impostata nel corrispondente gruppo con il comando /language."
     },
-    "about": "Questo progetto è open source. Dai un'occhiata su [GitHub](https://github.com/pterodattero/dictionaries-game-bot)",
-    "donate": "Non mi sento pronto per ricevere soldi veri, ma apprezzo il pensiero ❤️",
+    "about": "Questo progetto è open source. Se vuoi contribuire con proposte, segnalazioni, nuove funzionalità o traduzioni dai un'occhiata a <a href=\"https://github.com/pterodattero/dictionaries-game-bot\">questa repository</a>. Se hai apprezzato il gioco considera di fare una donazione con il comando /donate.",
+    "donate": "Supporta lo sviluppatore! Questo progetto non è a scopo di lucro, ma apprezzo un supporto finanziario ❤️",
     "command": {
-        "startError": "Per favore aggiungimi ad un gruppo per giocare",
-        "startNoGame": "Nessun gioco è in corso in questa chat",
-        "stop": "Gioco fermato"
+        "stop": "Gioco fermato.",
+        "stopInGroup": "Questo comando può essere usato solo in chat di gruppo."
     }
 }
