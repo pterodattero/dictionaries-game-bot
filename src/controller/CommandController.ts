@@ -4,6 +4,7 @@ import { Model } from "../model/Model";
 import { Status } from "../model/Game";
 import { LanguageController } from "./LanguageController";
 import { PreparationController } from "./PreparationController";
+import { RoundController } from "./RoundController";
 import Constants from "../constants";
 
 export namespace CommandController {
@@ -23,7 +24,7 @@ export namespace CommandController {
     export const stopCommand = async (msg: Message) => {
         const chatId = msg.chat.id;
         if (msg.chat.type !== 'group' && msg.chat.type !== 'supergroup') {
-            await global.bot.sendMessage(chatId, global.polyglot.t('command.stopInGroup'));
+            await global.bot.sendMessage(chatId, global.polyglot.t('command.groupOnly'));
         }
         else if (await Model.getGameStatus(chatId) !== Status.STOPPED) {
             return Promise.all([
@@ -36,6 +37,23 @@ export namespace CommandController {
         }
         else {
             await global.bot.sendMessage(chatId, global.polyglot.t('start.noGame'));
+        }
+    }
+
+    export const repeatCommand = async (msg: Message) => {
+        const chatId = msg.chat.id;
+        if (msg.chat.type !== 'group' && msg.chat.type !== 'supergroup') {
+            await global.bot.sendMessage(chatId, global.polyglot.t('command.groupOnly'));
+        }
+        else if (await Model.getCurrentPlayer(chatId) != msg.from?.id)
+        {
+            await global.bot.sendMessage(chatId, global.polyglot.t('command.repeat.onlyCurrentPlayer'));
+        }
+        else if (await Model.getGameStatus(chatId) != Status.ANSWER) {
+            await global.bot.sendMessage(chatId, global.polyglot.t('command.repeat.noAnswer'));
+        }
+        else {
+            await RoundController.newRound(chatId, {repeatRound: true});
         }
     }
 

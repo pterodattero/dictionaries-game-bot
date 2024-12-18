@@ -149,7 +149,7 @@ export namespace Model {
         return game.lap;
     }
 
-    export async function initRound(chatId: number): Promise<boolean> {
+    export async function initRound(chatId: number, options: {repeatRound?: boolean}): Promise<boolean> {
         const game = await getGame(chatId);
         game.pollMessageId = undefined;
         game.lapEndMessageId = undefined;
@@ -161,16 +161,18 @@ export namespace Model {
 
         game.word = undefined;
 
-        if (game.round === undefined) {
-            game.round = 0;
-            if (game.lap === undefined) {
-                game.lap = 0;
-            } else {
-                game.lap += 1;
+        if (!options.repeatRound) {
+            if (game.round === undefined) {
+                game.round = 0;
+                if (game.lap === undefined) {
+                    game.lap = 0;
+                } else {
+                    game.lap += 1;
+                }
             }
-        }
-        else {
-            game.round += 1;
+            else {
+                game.round += 1;
+            }
         }
 
         if (game.round === await numberOfPlayers(chatId)) {

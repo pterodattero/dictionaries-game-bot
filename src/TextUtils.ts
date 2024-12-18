@@ -63,10 +63,12 @@ export namespace TextUtils {
 
     export const getPollKeyboard = async (chatId: number) => {
         const definitions = await Model.getDefinitions(chatId);
+        const numberOfRows = Math.ceil(definitions.length / Constants.MAX_BUTTONS_IN_ROW);
+        const buttonsInARow = Math.ceil(definitions.length / numberOfRows);
 
         const keyboard: InlineKeyboardButton[][] = [];
         for (let i = 0; i < definitions.length; i++) {
-            if (i % Constants.MAX_BUTTONS_IN_ROW === 0) {
+            if (i % buttonsInARow === 0) {
                 keyboard.push([]);
             }
             keyboard[keyboard.length - 1].push({ text: String(i + 1), callback_data: `poll:${definitions[i].userId}` })
