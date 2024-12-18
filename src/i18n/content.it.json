@@ -81,6 +81,10 @@
     "donate": "Supporta lo sviluppatore! Questo progetto non è a scopo di lucro, ma apprezzo un supporto finanziario ❤️",
     "command": {
         "stop": "Gioco fermato.",
-        "stopInGroup": "Questo comando può essere usato solo in chat di gruppo."
+        "groupOnly": "Questo comando può essere usato solo in chat di gruppo.",
+        "repeat": {
+            "noAnswer": "Questo comando può essere usato solo dopo la scelta della parola e prima del voto.",
+            "onlyCurrentPlayer": "Questo comando può essere usato solo dal narratore."
+        }
     }
 }

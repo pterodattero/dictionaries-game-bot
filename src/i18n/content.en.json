@@ -79,6 +79,10 @@
     "donate": "Support the developer! This project is not made for profict, but financial support is appreciated ❤️",
     "command": {
         "stop": "Game stopped.",
-        "stopInGroup": "This command can be used only in group chats."
+        "groupOnly": "This command can be used only in group chats.",
+        "repeat": {
+            "noAnswer": "This command can be used only after the word choice and before the vote.",
+            "onlyCurrentPlayer": "This command can be used only by the current leader."
+        }
     }
 }

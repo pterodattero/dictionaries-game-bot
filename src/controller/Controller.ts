@@ -26,6 +26,9 @@ const handleCommand = async (msg: Message) => {
             case 'stop':
                 await CommandController.stopCommand(msg);
                 break;
+            case 'repeat':
+                await CommandController.repeatCommand(msg);
+                break;
             case 'help':
                 await CommandController.helpCommand(msg);
                 break;

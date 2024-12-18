@@ -22,8 +22,8 @@ export namespace RoundController {
     }
 
     // Start a new round
-    export const newRound = async (chatId: number) => {
-        if (!(await Model.initRound(chatId))) {
+    export const newRound = async (chatId: number, options: {repeatRound: boolean} = {repeatRound: false}) => {
+        if (!(await Model.initRound(chatId, options))) {
             return continueOrTerminate(chatId);
         }
         else {
