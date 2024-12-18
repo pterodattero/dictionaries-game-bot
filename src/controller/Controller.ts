@@ -78,7 +78,7 @@ const handleCallbackQuery = async (query: CallbackQuery) => {
                     return LanguageController.languageCallback(query);
                 case 'start':
                     await LanguageController.languageCallback(query);
-                    if (query.message.chat.type === 'group') {
+                    if (query.message.chat.type === 'group' || query.message.chat.type === 'supergroup') {
                         return PreparationController.startPreparation(query.message);
                     }
                     return global.bot.sendMessage(chatId, global.polyglot.t('start.welcome'), { parse_mode: 'HTML' });
@@ -162,7 +162,7 @@ const inferLanguageFromUpdate = async (update: Update) => {
         }
         catch { }
     }
-    const chatId = update.message?.chat.type === 'group' ? update.message?.chat.id
+    const chatId = (update.message?.chat.type === 'group' || update.message?.chat.type === 'supergroup') ? update.message?.chat.id
         : update.callback_query ? update.callback_query.message?.chat.id
         : await safeGetMessageInteraction() ?? update.message?.from?.id;
     const language = await Model.getLanguange(chatId);
